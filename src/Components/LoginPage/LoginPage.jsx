@@ -34,7 +34,7 @@ const LoginPage = () => {
           backgroundImage: `url(${BackImgLogin})`,
         }}
       ></div>
-      {/* Nuovo div per la 'I' */}
+
       <div className={`tv-icon ${isFocused ? "form-active" : ""}`}>
         <span>INFO</span>
         <video
