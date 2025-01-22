@@ -10,5 +10,46 @@
   left: 50%;
   transform: translate(-50%, -50%);
 }
-.form-login {
+.input-box {
+  background: transparent;
+  padding: 2em;
+  border-radius: 20px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(15px);
+  color: white;
+  text-align: center;
+}
+
+.background-login {
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.background-login::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background-color: black;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 1s ease, height 1s ease;
+}
+
+.background-login.active::after {
+  width: 200vmax;
+  height: 200vmax;
+}
+.input-box:focus {
+  outline: none; /* Rimuove il bordo predefinito */
+  border: 1px solid gold; /* Bordo oro */
+  box-shadow: 0 0 5px gold; /* Aggiunge un bagliore oro */
+  transition: border 0.3s ease, box-shadow 0.3s ease; /* Transizione fluida */
 }
