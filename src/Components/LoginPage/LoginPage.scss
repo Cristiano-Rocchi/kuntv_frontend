@@ -1,0 +1,157 @@
+@import "../../App.scss";
+
+/* ---------- BACKGROUND ---------- */
+.background-login {
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.background-login::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background-color: black;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 1s ease, height 1s ease;
+}
+
+.background-login.active::after {
+  width: 200vmax;
+  height: 200vmax;
+}
+
+/* ---------- FORM ---------- */
+.form-secret {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column; /* Disposizione verticale */
+  align-items: center; /* Centra orizzontalmente gli elementi */
+}
+
+/* ---------- INPUT ---------- */
+.input-box {
+  background: transparent;
+  padding: 2em;
+  border-radius: 20px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(15px);
+  color: white;
+  text-align: center;
+}
+
+.input-box:focus {
+  outline: none;
+  border: 1px solid $primary;
+  box-shadow: 0 0 5px $primary;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* ---------- PLACEHOLDER TEXT ---------- */
+.placeholder-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #f9f9f9;
+  white-space: nowrap;
+  overflow: hidden;
+  animation: typing 3s steps(12) infinite, blink 0.5s step-end infinite;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 12ch; /* Larghezza del testo completo */
+  }
+}
+
+@keyframes blink {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #aaa;
+  }
+}
+
+.form-secret:focus-within .placeholder-text {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* ---------- BOTTONE INVIA ---------- */
+.submit-button-login {
+  margin-top: 2em;
+  padding: 10px 20px;
+  background-color: $primary;
+  backdrop-filter: blur(15px);
+  color: black;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.submit-button-login:hover {
+  background-color: $primary;
+  transform: scale(1.05);
+  color: black;
+  box-shadow: 0 0 5px $primary, 0 0 25px $primary, 0 0 50px $primary,
+    0 0 200px $primary;
+  -webkkit-box-reflect: below 1px linear-gradient(transparent, #0005);
+}
+
+.submit-button-login:active {
+  background-color: darkorange;
+  transform: scale(1);
+}
+
+/* ---------- ICONA TV ---------- */
+.tv-icon {
+  position: absolute;
+  top: 23%; /* Posizionamento verticale */
+  left: 21%; /* Posizionamento orizzontale */
+  font-size: 2em;
+  color: black;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tv-icon:hover .hover-video {
+  display: block; /* Mostra il video */
+  opacity: 1; /* Rende visibile il video */
+  transform: scale(1);
+}
+
+.hover-video {
+  position: absolute;
+  top: -20px;
+  left: -50px;
+  width: 200px;
+  height: 170px;
+  background-color: black;
+  border-radius: 3px;
+  display: none; /* Nasconde il video di default */
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.2s ease, transform 0.2s ease; /* Transizione fluida */
+}
