@@ -59,11 +59,15 @@ const LoginPage = () => {
           />
           <span className="placeholder-text">Enter a secret</span>
         </form>
-        {inputValue && (
-          <button className="submit-button-login" type="button">
-            Invia
-          </button>
-        )}
+      </div>
+      <div className="wrapper-button">
+        {" "}
+        <button
+          className={`submit-button-login ${inputValue ? "show" : ""}`}
+          type="button"
+        >
+          Invia
+        </button>
       </div>
     </div>
   );
