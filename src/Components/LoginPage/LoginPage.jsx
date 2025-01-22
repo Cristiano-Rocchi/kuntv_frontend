@@ -35,7 +35,7 @@ const LoginPage = () => {
         }}
       ></div>
       {/* Nuovo div per la 'I' */}
-      <div className="tv-icon">
+      <div className={`tv-icon ${isFocused ? "form-active" : ""}`}>
         <span>INFO</span>
         <video
           className="hover-video"

@@ -155,3 +155,8 @@
   transform: scale(0.8);
   transition: opacity 0.2s ease, transform 0.2s ease; /* Transizione fluida */
 }
+
+/*Disabilita il video quando il form è attivo */
+.tv-icon.form-active:hover .hover-video {
+  display: none;
+}
