@@ -53,3 +53,41 @@
   box-shadow: 0 0 5px gold; /* Aggiunge un bagliore oro */
   transition: border 0.3s ease, box-shadow 0.3s ease; /* Transizione fluida */
 }
+
+.placeholder-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  color: #f9f9f9;
+  white-space: nowrap;
+  overflow: hidden;
+
+  animation: typing 3s steps(12) infinite, blink 0.5s step-end infinite;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 12ch; /* Larghezza del testo completo */
+  }
+}
+
+@keyframes blink {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #aaa;
+  }
+}
+
+.form-secret:focus-within .placeholder-text {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
