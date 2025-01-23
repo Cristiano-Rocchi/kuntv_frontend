@@ -1,0 +1,37 @@
+@import "../../App.scss";
+.nav-body {
+  position: fixed;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border-bottom: 2px solid rgba(205, 164, 52, 0.2);
+}
+
+.nav-elements .nav-link {
+  margin-inline: 1em;
+}
+.nav-elements .nav-link:hover {
+  background-color: gold;
+}
+
+.nav-elements .nav-link:hover {
+  color: $primary;
+  transition: 0.3s;
+}
+.nav-body span {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(205, 164, 52, 0.4),
+    transparent
+  );
+  transition: 0.5s; //velocita effetto vetro
+}
+.nav-body:hover span {
+  left: 100%;
+}
