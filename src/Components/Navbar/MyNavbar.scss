@@ -1,12 +1,9 @@
 @import "../../App.scss";
 
-.nav-body {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(15px);
-  border: 2px solid rgba(205, 164, 52, 0.2);
-  clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
-  border-radius: 10px;
-  padding: 1.5em 10em;
+h1.logo {
+  font-size: 1.5rem;
+  color: white;
+  transition: all 0.5s ease-in-out;
 }
 .navbar-wrapper {
   display: flex;
@@ -14,26 +11,35 @@
   width: 100%;
   top: 0;
 }
-
-h1.logo {
-  font-size: 1.5rem;
-  color: white;
+//body della navbar
+.nav-body {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(205, 164, 52, 0.2);
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%); //effetto tagliato
+  border-radius: 10px;
+  padding: 1.5em 10em;
 }
 
+// elementi della navbar
 .nav-elements {
   display: flex;
   gap: 1em;
 }
 
 .nav-elements .nav-link {
-  color: white;
+  color: #898989;
+  position: relative;
+  font-weight: 600;
   transition: color 0.3s;
 }
 
 .nav-elements .nav-link:hover {
-  color: $primary; /* Assicurati che $primary sia definito */
+  color: white;
+  transform: scale(1.2);
 }
 
+//effetto vetro
 .nav-body span {
   position: absolute;
   top: 0;
@@ -50,4 +56,26 @@ h1.logo {
 }
 .nav-body:hover span {
   left: 100%;
+}
+
+// Rende i loghi invisibili e li fa sparire
+.navbar-wrapper.scrolled h1.logo {
+  opacity: 0;
+  transform: translateY(-50px);
+  transition: all 0.5s ease-in-out;
+}
+
+//sottolineatura animata
+.nav-elements .nav-link::before {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: $primary;
+  transition: width 0.3s ease-in-out;
+}
+.nav-elements .nav-link:hover::before {
+  width: 100%;
 }
