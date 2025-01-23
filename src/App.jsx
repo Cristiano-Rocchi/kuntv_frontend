@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import LoginPage from "./Components/LoginPage/LoginPage";
 import MyNavbar from "./Components/Navbar/MyNavbar";
 import Home from "./Components/Home/Home";
+import TvSeries from "./Components/TvSeries/TvSeries";
 
 const App = () => {
   const location = useLocation();
@@ -14,6 +15,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/tv-series" element={<TvSeries />} />
       </Routes>
     </>
   );
