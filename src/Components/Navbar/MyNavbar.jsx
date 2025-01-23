@@ -5,10 +5,10 @@ import { Container, Nav, Navbar } from "react-bootstrap";
 
 const MyNavbar = () => {
   return (
-    <div className="navbar-wrapper d-flex justify-content-between ">
+    <div className="navbar-wrapper d-flex justify-content-around ">
       <h1 className="logo ms-5 mt-3">Kun</h1>
       <Navbar expand="lg" className="nav-body" variant="dark">
-        <Container className="d-flex justify-content-center">
+        <Container>
           <Nav className="nav-elements">
             <Nav.Link href="#">Home</Nav.Link>
             <Nav.Link href="#">Serie TV</Nav.Link>
