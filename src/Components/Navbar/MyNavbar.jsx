@@ -25,7 +25,7 @@ const MyNavbar = () => {
         isScrolled ? "scrolled" : ""
       }`}
     >
-      <h1 className="logo ms-5 mt-3">Kun</h1>
+      <h1 className="logo ms-5 mt-3">KUN TV</h1>
       <Navbar expand="lg" className="nav-body">
         <Container>
           <span></span>
@@ -37,7 +37,7 @@ const MyNavbar = () => {
           </Nav>
         </Container>
       </Navbar>
-      <h1 className="logo me-5 mt-3">Tv</h1>
+      <h1 className="logo me-5 mt-3">Richiedi un film</h1>
     </div>
   );
 };
