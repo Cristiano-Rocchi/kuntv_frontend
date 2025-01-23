@@ -2,7 +2,7 @@ import "./Home.scss";
 const prova = () => {
   return (
     <div className="prova">
-      <h1>Prova</h1>
+      <h1></h1>
     </div>
   );
 };

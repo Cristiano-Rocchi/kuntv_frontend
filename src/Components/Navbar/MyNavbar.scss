@@ -1,28 +1,42 @@
 @import "../../App.scss";
+
 .nav-body {
-  position: fixed;
-  padding: 1em 10em;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(15px);
   border: 2px solid rgba(205, 164, 52, 0.2);
   clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
   border-radius: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+  padding: 1.5em 10em;
 }
-.nav-body:hover {
-  padding-block: 2em;
+.navbar-wrapper {
+  display: flex;
+  position: fixed;
+  width: 100%;
+  top: 0;
 }
+
+h1.logo {
+  font-size: 1.5rem;
+  color: white;
+  margin: 0;
+  padding: 0;
+  text-transform: uppercase;
+}
+
+.nav-elements {
+  display: flex;
+  gap: 1em;
+}
+
 .nav-elements .nav-link {
-  margin-inline: 1em;
-}
-.nav-elements .nav-link:hover {
+  color: white;
+  transition: color 0.3s;
 }
 
 .nav-elements .nav-link:hover {
-  color: $primary;
-  transition: 0.3s;
+  color: $primary; /* Assicurati che $primary sia definito */
 }
+
 .nav-body span {
   position: absolute;
   top: 0;
