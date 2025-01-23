@@ -1,17 +1,22 @@
 @import "../../App.scss";
 .nav-body {
   position: fixed;
-  width: 100%;
+  padding: 1em 10em;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(15px);
-  border-bottom: 2px solid rgba(205, 164, 52, 0.2);
+  border: 2px solid rgba(205, 164, 52, 0.2);
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+  border-radius: 10px;
+  left: 50%;
+  transform: translateX(-50%);
 }
-
+.nav-body:hover {
+  padding-block: 2em;
+}
 .nav-elements .nav-link {
   margin-inline: 1em;
 }
 .nav-elements .nav-link:hover {
-  background-color: gold;
 }
 
 .nav-elements .nav-link:hover {
