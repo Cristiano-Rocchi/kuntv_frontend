@@ -1,4 +1,5 @@
 import "./Home.scss";
+
 const prova = () => {
   return (
     <div className="prova">
