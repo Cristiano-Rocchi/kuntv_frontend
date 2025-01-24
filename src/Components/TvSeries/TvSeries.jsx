@@ -3,8 +3,10 @@ import "./TvSeries.scss";
 
 const TvSeries = () => {
   return (
-    <div>
-      <h1>Tv Series</h1>
+    <div className="body">
+      <div>
+        <h1>Tv Series</h1>
+      </div>
     </div>
   );
 };

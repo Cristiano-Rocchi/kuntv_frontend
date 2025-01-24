@@ -4,6 +4,7 @@ import LoginPage from "./Components/LoginPage/LoginPage";
 import MyNavbar from "./Components/Navbar/MyNavbar";
 import Home from "./Components/Home/Home";
 import TvSeries from "./Components/TvSeries/TvSeries";
+import Admin from "./Components/Admin/Admin";
 
 const App = () => {
   const location = useLocation();
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/" element={<LoginPage />} />
         <Route path="/home" element={<Home />} />
         <Route path="/tvseries" element={<TvSeries />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </>
   );
