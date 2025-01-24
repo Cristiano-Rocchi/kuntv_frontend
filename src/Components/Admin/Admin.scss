@@ -1,1 +1,24 @@
 @import "../../App.scss";
+
+.section-admin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  border: 1px solid $primary;
+  margin: 1em;
+  padding: 2em;
+}
+.button-admin {
+  background: linear-gradient(
+    45deg,
+    darken($primary, 25%),
+    darken($primary, 45%)
+  );
+  color: white;
+  padding: 0.5em 1em;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 0.5em;
+}
