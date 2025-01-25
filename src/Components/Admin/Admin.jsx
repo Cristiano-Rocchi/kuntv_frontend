@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Col, Container, Row, Form } from "react-bootstrap";
 import "./Admin.scss";
 
 const Admin = () => {
   // -------------------STATI-------------------
-  // Stato per gestire i dati del form di aggiunta film
+  // Stato per gestire i dati del form di aggiunta FILM
   const [filmData, setFilmData] = useState({
     titolo: "",
     genere: "",
@@ -19,6 +19,12 @@ const Admin = () => {
     anno: "",
     file: null,
   });
+  // Stato per gestire i dati del form di aggiunta STAGIONE
+  const [stagioneData, setStagioneData] = useState({
+    titolo: "",
+    anno: "",
+    sezioneId: "",
+  });
 
   // Stati per la gestione della visualizzazione dei form
   const [showFilmForm, setShowFilmForm] = useState(false); // Form per aggiungere un film
@@ -26,6 +32,8 @@ const Admin = () => {
   const [showSezioneForm, setShowSezioneForm] = useState(false); // Form per aggiungere una sezione
   const [showStagioneForm, setShowStagioneForm] = useState(false); // Form per aggiungere una stagione
   const [showVideoForm, setShowVideoForm] = useState(false); // Form per aggiungere un video
+  const [sezioni, setSezioni] = useState([]); // Stato per memorizzare le sezioni
+  const [selectedSezioneId, setSelectedSezioneId] = useState(""); // Stato per memorizzare l'id della sezione selezionata
 
   // -------------------FUNZIONI DI VISUALIZZAZIONE-------------------
   // Funzione per mostrare/nascondere il form per aggiungere un FILM
@@ -97,10 +105,22 @@ const Admin = () => {
       file: e.target.files[0],
     });
   };
+  // Funzione per gestire i cambiamenti degli input in STAGIONE
+  const handleStagioneInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "sezioneId") {
+      setSelectedSezioneId(value);
+    } else {
+      setStagioneData({
+        ...stagioneData,
+        [name]: value,
+      });
+    }
+  };
 
   // -------------------INVIO DEL FORM-------------------
   // Funzione per gestire l'invio del form
-  const handleSubmit = async (e) => {
+  const handleFilmSubmit = async (e) => {
     e.preventDefault();
 
     // Validazione dei campi
@@ -190,6 +210,73 @@ const Admin = () => {
       console.error("Errore nella richiesta:", error.message);
     }
   };
+  const handleStagioneSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validazione
+    if (!stagioneData.titolo || !stagioneData.anno || !selectedSezioneId) {
+      alert("Compila tutti i campi obbligatori.");
+      return;
+    }
+
+    // Aggiorna `stagioneData` con il valore selezionato
+    const dataToSubmit = {
+      ...stagioneData,
+      sezioneId: selectedSezioneId,
+    };
+
+    try {
+      const response = await fetch("http://localhost:3001/api/stagioni", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzc4MjczNzEsImV4cCI6MTczODQzMjE3MSwic3ViIjoiYWRtaW4ifQ.6VY92sbGGql4txpwfp5IVFnnCmlyOki1YQiunuKazmr2pTVL5s5HLYq9Or2gHzYeg-iCz3D_8bUWTWViOmSFMw`,
+        },
+        body: JSON.stringify(dataToSubmit),
+      });
+
+      if (response.ok) {
+        const createdStagione = await response.json();
+        console.log("Stagione creata con successo:", createdStagione);
+        setStagioneData({ titolo: "", anno: "", sezioneId: "" }); // Reset dello stato
+        setSelectedSezioneId(""); // Reset della selezione
+      } else {
+        const errorMessage = await response.text();
+        console.error(
+          "Errore durante la creazione della stagione:",
+          errorMessage
+        );
+      }
+    } catch (error) {
+      console.error("Errore nella richiesta:", error.message);
+    }
+  };
+
+  // Effettua una richiesta per ottenere le sezioni
+  useEffect(() => {
+    const fetchSezioni = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/sezioni", {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzc4MjczNzEsImV4cCI6MTczODQzMjE3MSwic3ViIjoiYWRtaW4ifQ.6VY92sbGGql4txpwfp5IVFnnCmlyOki1YQiunuKazmr2pTVL5s5HLYq9Or2gHzYeg-iCz3D_8bUWTWViOmSFMw`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setSezioni(data); // Popola lo stato con le sezioni
+        } else {
+          console.error(
+            "Errore durante il recupero delle sezioni:",
+            await response.text()
+          );
+        }
+      } catch (error) {
+        console.error("Errore nella richiesta:", error.message);
+      }
+    };
+
+    fetchSezioni();
+  }, []);
 
   return (
     <div className="body">
@@ -211,7 +298,7 @@ const Admin = () => {
                 filmData,
                 handleFilmInputChange,
                 handleFileChange,
-                handleSubmit
+                handleFilmSubmit
               )}
             {/* Bottoni per aggiungere Serie TV */}
             {showSerieTvOptions && (
@@ -242,7 +329,14 @@ const Admin = () => {
                     handleSezioneFileChange
                   )}
                 {/* Form per aggiungere una stagione */}
-                {showStagioneForm && renderStagioneForm()}
+                {showStagioneForm &&
+                  renderStagioneForm(
+                    handleStagioneSubmit,
+                    stagioneData,
+                    handleStagioneInputChange,
+                    sezioni,
+                    selectedSezioneId
+                  )}
                 {/* Form per aggiungere un video */}
                 {showVideoForm && renderVideoForm()}
               </div>
@@ -272,10 +366,10 @@ const renderFilmForm = (
   filmData,
   handleFilmInputChange,
   handleFileChange,
-  handleSubmit
+  handleFilmSubmit
 ) => (
   <div className="form-container">
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleFilmSubmit}>
       <Form.Group controlId="formTitolo" className="mb-3">
         <Form.Label className="text-gold">Titolo</Form.Label>
         <Form.Control
@@ -387,21 +481,56 @@ const renderSezioneForm = (
 );
 
 //form per aggiungere una stagione
-const renderStagioneForm = () => (
+const renderStagioneForm = (
+  handleStagioneSubmit,
+  stagioneData,
+  handleStagioneInputChange,
+  sezioni,
+  selectedSezioneId
+) => (
   <div className="form-container mt-3">
-    <Form.Group controlId="formSezione" className="mb-3">
-      <Form.Label>Sezione</Form.Label>
-      <Form.Control type="text" placeholder="Inserisci la sezione" />
-    </Form.Group>
+    <Form onSubmit={handleStagioneSubmit}>
+      <Form.Group controlId="formTitolo">
+        <Form.Label>Titolo</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Inserisci il titolo"
+          name="titolo"
+          value={stagioneData.titolo}
+          onChange={handleStagioneInputChange}
+        />
+      </Form.Group>
 
-    <Form.Group controlId="formAnnoStagione" className="mb-3">
-      <Form.Label>Anno</Form.Label>
-      <Form.Control type="text" placeholder="Inserisci il titolo" />
-    </Form.Group>
-    <Form.Group controlId="formTitoloStagione" className="mb-3">
-      <Form.Label>Titolo</Form.Label>
-      <Form.Control type="text" placeholder="Inserisci il titolo" />
-    </Form.Group>
+      <Form.Group controlId="formAnno">
+        <Form.Label>Anno</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Inserisci l'anno"
+          name="anno"
+          value={stagioneData.anno}
+          onChange={handleStagioneInputChange}
+        />
+      </Form.Group>
+
+      <Form.Group controlId="formSezione">
+        <Form.Label>Sezione</Form.Label>
+        <Form.Control
+          as="select"
+          name="sezioneId"
+          value={selectedSezioneId} // Usa `selectedSezioneId`
+          onChange={handleStagioneInputChange}
+        >
+          <option value="">Seleziona una sezione</option>
+          {sezioni.map((sezione) => (
+            <option key={sezione.id} value={sezione.id}>
+              {sezione.titolo}
+            </option>
+          ))}
+        </Form.Control>
+      </Form.Group>
+
+      <Button type="submit">Crea Stagione</Button>
+    </Form>
   </div>
 );
 
