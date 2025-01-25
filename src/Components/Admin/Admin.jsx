@@ -12,6 +12,14 @@ const Admin = () => {
     file: null,
   });
 
+  // stato per gestire i dati del form di aggiunta SEZIONE
+  const [sezioneData, setSezioneData] = useState({
+    titolo: "",
+    tag: "",
+    anno: "",
+    file: null,
+  });
+
   // Stati per la gestione della visualizzazione dei form
   const [showFilmForm, setShowFilmForm] = useState(false); // Form per aggiungere un film
   const [showSerieTvOptions, setShowSerieTvOptions] = useState(false); // Opzioni per le Serie TV
@@ -59,7 +67,7 @@ const Admin = () => {
 
   // -------------------GESTIONE DEI DATI DEL FORM-------------------
   // Funzione per gestire i cambiamenti degli input
-  const handleInputChange = (e) => {
+  const handleFilmInputChange = (e) => {
     const { name, value } = e.target;
     setFilmData({
       ...filmData,
@@ -71,6 +79,21 @@ const Admin = () => {
   const handleFileChange = (e) => {
     setFilmData({
       ...filmData,
+      file: e.target.files[0],
+    });
+  };
+  // Funzione per gestire i cambiamenti degli input in SEZIONE
+  const handleSezioneInputChange = (e) => {
+    const { name, value } = e.target;
+    setSezioneData({
+      ...sezioneData,
+      [name]: value,
+    });
+  };
+  // Funzione per gestire il caricamento del file in SEZIONE
+  const handleSezioneFileChange = (e) => {
+    setSezioneData({
+      ...sezioneData,
       file: e.target.files[0],
     });
   };
@@ -111,9 +134,55 @@ const Admin = () => {
       if (response.ok) {
         const createdFilm = await response.json();
         console.log("Film creato con successo:", createdFilm);
+        setFilmData({ titolo: "", genere: "", durata: "", file: null }); // Reset dello stato
       } else {
         console.error(
           "Errore durante la creazione del film:",
+          await response.text()
+        );
+      }
+    } catch (error) {
+      console.error("Errore nella richiesta:", error.message);
+    }
+  };
+  const handleSezioneSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validazione dei campi
+    if (
+      !sezioneData.titolo ||
+      !sezioneData.tag ||
+      !sezioneData.anno ||
+      !sezioneData.file
+    ) {
+      alert("Compila tutti i campi obbligatori.");
+      return;
+    }
+
+    // Creazione del FormData
+    const formData = new FormData();
+    formData.append("titolo", sezioneData.titolo);
+    formData.append("tag", sezioneData.tag);
+    formData.append("anno", sezioneData.anno);
+    formData.append("file", sezioneData.file);
+
+    // Invio della richiesta
+    try {
+      const response = await fetch("http://localhost:3001/api/sezioni", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzc4MjczNzEsImV4cCI6MTczODQzMjE3MSwic3ViIjoiYWRtaW4ifQ.6VY92sbGGql4txpwfp5IVFnnCmlyOki1YQiunuKazmr2pTVL5s5HLYq9Or2gHzYeg-iCz3D_8bUWTWViOmSFMw`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const createdSezione = await response.json();
+        console.log("Sezione creata con successo:", createdSezione);
+        setSezioneData({ titolo: "", tag: "", anno: "", file: null }); // Reset dello stato
+      } else {
+        console.error(
+          "Errore durante la creazione della sezione:",
           await response.text()
         );
       }
@@ -140,7 +209,7 @@ const Admin = () => {
             {showFilmForm &&
               renderFilmForm(
                 filmData,
-                handleInputChange,
+                handleFilmInputChange,
                 handleFileChange,
                 handleSubmit
               )}
@@ -165,7 +234,13 @@ const Admin = () => {
                   </Button>
                 </div>
                 {/* Form per aggiungere una sezione */}
-                {showSezioneForm && renderSezioneForm()}
+                {showSezioneForm &&
+                  renderSezioneForm(
+                    handleSezioneSubmit,
+                    sezioneData,
+                    handleSezioneInputChange,
+                    handleSezioneFileChange
+                  )}
                 {/* Form per aggiungere una stagione */}
                 {showStagioneForm && renderStagioneForm()}
                 {/* Form per aggiungere un video */}
@@ -192,11 +267,10 @@ const Admin = () => {
 };
 
 // ---FUNZIONI FORM----
-
 // Form per aggiungere un film
 const renderFilmForm = (
   filmData,
-  handleInputChange,
+  handleFilmInputChange,
   handleFileChange,
   handleSubmit
 ) => (
@@ -209,7 +283,7 @@ const renderFilmForm = (
           placeholder="Inserisci il titolo"
           name="titolo"
           value={filmData.titolo}
-          onChange={handleInputChange}
+          onChange={handleFilmInputChange}
         />
       </Form.Group>
 
@@ -220,7 +294,7 @@ const renderFilmForm = (
           placeholder="Inserisci il genere"
           name="genere"
           value={filmData.genere}
-          onChange={handleInputChange}
+          onChange={handleFilmInputChange}
         />
       </Form.Group>
 
@@ -231,7 +305,7 @@ const renderFilmForm = (
           placeholder="Inserisci la durata"
           name="durata"
           value={filmData.durata}
-          onChange={handleInputChange}
+          onChange={handleFilmInputChange}
         />
       </Form.Group>
 
@@ -255,34 +329,60 @@ const renderFilmForm = (
   </div>
 );
 // Form per aggiungere una sezione
-const renderSezioneForm = () => (
+const renderSezioneForm = (
+  handleSezioneSubmit,
+  sezioneData,
+  handleSezioneInputChange,
+  handleSezioneFileChange
+) => (
   <div className="form-container mt-3">
-    <Form.Group controlId="formTitoloSezione" className="mb-3">
-      <Form.Label>Titolo</Form.Label>
-      <Form.Control type="text" placeholder="Inserisci il titolo" />
-    </Form.Group>
+    <Form onSubmit={handleSezioneSubmit}>
+      <Form.Group controlId="formTitoloSezione" className="mb-3">
+        <Form.Label>Titolo</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Inserisci il titolo"
+          name="titolo"
+          value={sezioneData.titolo}
+          onChange={handleSezioneInputChange}
+        />
+      </Form.Group>
 
-    <Form.Group controlId="formTagSezione" className="mb-3">
-      <Form.Label>Tag</Form.Label>
-      <Form.Control type="text" placeholder="Inserisci il tag" />
-    </Form.Group>
+      <Form.Group controlId="formTagSezione" className="mb-3">
+        <Form.Label>Tag</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Inserisci il tag"
+          name="tag"
+          value={sezioneData.tag}
+          onChange={handleSezioneInputChange}
+        />
+      </Form.Group>
 
-    <Form.Group controlId="formAnnoSezione" className="mb-3">
-      <Form.Label>Anno</Form.Label>
-      <Form.Control type="text" placeholder="Inserisci l'anno" />
-    </Form.Group>
+      <Form.Group controlId="formAnnoSezione" className="mb-3">
+        <Form.Label>Anno</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Inserisci l'anno"
+          name="anno"
+          value={sezioneData.anno}
+          onChange={handleSezioneInputChange}
+        />
+      </Form.Group>
 
-    <Form.Group controlId="formCopertinaSezione" className="mb-3">
-      <Form.Label>Copertina</Form.Label>
-      <Form.Control
-        type="file"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-          const file = e.dataTransfer.files[0];
-        }}
-      />
-    </Form.Group>
+      <Form.Group controlId="formFileSezione" className="mb-3">
+        <Form.Label>Copertina</Form.Label>
+        <Form.Control
+          type="file"
+          name="file"
+          onChange={handleSezioneFileChange}
+        />
+      </Form.Group>
+
+      <Button type="submit" className="button-admin">
+        Aggiungi Sezione
+      </Button>
+    </Form>
   </div>
 );
 
