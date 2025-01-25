@@ -3,7 +3,7 @@ import { Button, Col, Container, Row, Form } from "react-bootstrap";
 import "./Admin.scss";
 
 const Admin = () => {
-  // ------STATI------
+  // -------------------STATI-------------------
   // Stato per gestire i dati del form di aggiunta film
   const [filmData, setFilmData] = useState({
     titolo: "",
@@ -11,19 +11,22 @@ const Admin = () => {
     durata: "",
     file: null,
   });
-  const [showFilmForm, setShowFilmForm] = useState(false); // stato per il form per aggiungere un film
-  const [showSerieTvOptions, setShowSerieTvOptions] = useState(false); // stato per le opzioni per le Serie TV
-  const [showSezioneForm, setShowSezioneForm] = useState(false); // stato per il form per aggiungere una sezione
-  const [showStagioneForm, setShowStagioneForm] = useState(false); // stato per il form per aggiungere una stagione
-  const [showVideoForm, setShowVideoForm] = useState(false); // stato per il form per aggiungere un video
 
-  // ---FUNZIONI----
+  // Stati per la gestione della visualizzazione dei form
+  const [showFilmForm, setShowFilmForm] = useState(false); // Form per aggiungere un film
+  const [showSerieTvOptions, setShowSerieTvOptions] = useState(false); // Opzioni per le Serie TV
+  const [showSezioneForm, setShowSezioneForm] = useState(false); // Form per aggiungere una sezione
+  const [showStagioneForm, setShowStagioneForm] = useState(false); // Form per aggiungere una stagione
+  const [showVideoForm, setShowVideoForm] = useState(false); // Form per aggiungere un video
+
+  // -------------------FUNZIONI DI VISUALIZZAZIONE-------------------
   // Funzione per mostrare/nascondere il form per aggiungere un FILM
   const toggleFilmForm = () => {
     setShowFilmForm(!showFilmForm);
     setShowSerieTvOptions(false);
     setShowSezioneForm(false);
   };
+
   // Funzione per mostrare/nascondere le opzioni per le SERIE TV
   const toggleSerieTvOptions = () => {
     setShowSerieTvOptions(!showSerieTvOptions);
@@ -32,6 +35,7 @@ const Admin = () => {
     setShowStagioneForm(false);
     setShowVideoForm(false);
   };
+
   // Funzione per mostrare/nascondere il form per aggiungere una SEZIONE
   const toggleSezioneForm = () => {
     setShowSezioneForm(!showSezioneForm);
@@ -46,12 +50,15 @@ const Admin = () => {
     setShowVideoForm(false);
   };
 
+  // Funzione per mostrare/nascondere il form per aggiungere un VIDEO
   const toggleVideoForm = () => {
     setShowVideoForm(!showVideoForm);
     setShowSezioneForm(false);
     setShowStagioneForm(false);
   };
 
+  // -------------------GESTIONE DEI DATI DEL FORM-------------------
+  // Funzione per gestire i cambiamenti degli input
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFilmData({
@@ -60,6 +67,7 @@ const Admin = () => {
     });
   };
 
+  // Funzione per gestire il caricamento del file
   const handleFileChange = (e) => {
     setFilmData({
       ...filmData,
@@ -67,9 +75,12 @@ const Admin = () => {
     });
   };
 
+  // -------------------INVIO DEL FORM-------------------
+  // Funzione per gestire l'invio del form
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validazione dei campi
     if (
       !filmData.titolo ||
       !filmData.genere ||
@@ -80,12 +91,14 @@ const Admin = () => {
       return;
     }
 
+    // Creo un oggetto FormData per inviare i dati
     const formData = new FormData();
     formData.append("titolo", filmData.titolo);
     formData.append("genere", filmData.genere);
     formData.append("durata", filmData.durata);
     formData.append("file", filmData.file);
 
+    // -----------FETCH-----------
     try {
       const response = await fetch("http://localhost:3001/api/film/upload", {
         method: "POST",
@@ -97,6 +110,7 @@ const Admin = () => {
 
       if (response.ok) {
         const createdFilm = await response.json();
+        console.log("Film creato con successo:", createdFilm);
       } else {
         console.error(
           "Errore durante la creazione del film:",
