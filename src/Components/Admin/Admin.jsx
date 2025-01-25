@@ -1,10 +1,16 @@
 import React, { useState } from "react";
 import { Button, Col, Container, Row, Form } from "react-bootstrap";
 import "./Admin.scss";
-import { render } from "sass";
 
-// ------STATI------
 const Admin = () => {
+  // ------STATI------
+  // Stato per gestire i dati del form di aggiunta film
+  const [filmData, setFilmData] = useState({
+    titolo: "",
+    genere: "",
+    durata: "",
+    file: null,
+  });
   const [showFilmForm, setShowFilmForm] = useState(false); // stato per il form per aggiungere un film
   const [showSerieTvOptions, setShowSerieTvOptions] = useState(false); // stato per le opzioni per le Serie TV
   const [showSezioneForm, setShowSezioneForm] = useState(false); // stato per il form per aggiungere una sezione
@@ -46,6 +52,62 @@ const Admin = () => {
     setShowStagioneForm(false);
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFilmData({
+      ...filmData,
+      [name]: value,
+    });
+  };
+
+  const handleFileChange = (e) => {
+    setFilmData({
+      ...filmData,
+      file: e.target.files[0],
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (
+      !filmData.titolo ||
+      !filmData.genere ||
+      !filmData.durata ||
+      !filmData.file
+    ) {
+      alert("Compila tutti i campi obbligatori.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("titolo", filmData.titolo);
+    formData.append("genere", filmData.genere);
+    formData.append("durata", filmData.durata);
+    formData.append("file", filmData.file);
+
+    try {
+      const response = await fetch("http://localhost:3001/api/film/upload", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzc4MjczNzEsImV4cCI6MTczODQzMjE3MSwic3ViIjoiYWRtaW4ifQ.6VY92sbGGql4txpwfp5IVFnnCmlyOki1YQiunuKazmr2pTVL5s5HLYq9Or2gHzYeg-iCz3D_8bUWTWViOmSFMw`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const createdFilm = await response.json();
+      } else {
+        console.error(
+          "Errore durante la creazione del film:",
+          await response.text()
+        );
+      }
+    } catch (error) {
+      console.error("Errore nella richiesta:", error.message);
+    }
+  };
+
   return (
     <div className="body">
       <Container className="d-flex align-items-center m-auto pt-5">
@@ -61,7 +123,13 @@ const Admin = () => {
             </div>
 
             {/* Form per aggiungere film */}
-            {showFilmForm && renderFilmForm()}
+            {showFilmForm &&
+              renderFilmForm(
+                filmData,
+                handleInputChange,
+                handleFileChange,
+                handleSubmit
+              )}
             {/* Bottoni per aggiungere Serie TV */}
             {showSerieTvOptions && (
               <div className="form-container">
@@ -112,35 +180,64 @@ const Admin = () => {
 // ---FUNZIONI FORM----
 
 // Form per aggiungere un film
-const renderFilmForm = () => (
+const renderFilmForm = (
+  filmData,
+  handleInputChange,
+  handleFileChange,
+  handleSubmit
+) => (
   <div className="form-container">
-    <Form.Group controlId="formTitolo" className="mb-3">
-      <Form.Label className="text-gold">Titolo</Form.Label>
-      <Form.Control type="text" placeholder="Inserisci il titolo" />
-    </Form.Group>
+    <Form onSubmit={handleSubmit}>
+      <Form.Group controlId="formTitolo" className="mb-3">
+        <Form.Label className="text-gold">Titolo</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Inserisci il titolo"
+          name="titolo"
+          value={filmData.titolo}
+          onChange={handleInputChange}
+        />
+      </Form.Group>
 
-    <Form.Group controlId="formGenere" className="mb-3">
-      <Form.Label className="text-gold">Genere</Form.Label>
-      <Form.Control type="text" placeholder="Inserisci il genere" />
-    </Form.Group>
+      <Form.Group controlId="formGenere" className="mb-3">
+        <Form.Label className="text-gold">Genere</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Inserisci il genere"
+          name="genere"
+          value={filmData.genere}
+          onChange={handleInputChange}
+        />
+      </Form.Group>
 
-    <Form.Group controlId="formDurata" className="mb-3">
-      <Form.Label className="text-gold">Durata</Form.Label>
-      <Form.Control type="text" placeholder="Inserisci la durata" />
-    </Form.Group>
+      <Form.Group controlId="formDurata" className="mb-3">
+        <Form.Label className="text-gold">Durata</Form.Label>
+        <Form.Control
+          type="text"
+          placeholder="Inserisci la durata"
+          name="durata"
+          value={filmData.durata}
+          onChange={handleInputChange}
+        />
+      </Form.Group>
 
-    <Form.Group controlId="formFile" className="mb-3">
-      <Form.Label className="text-gold">File</Form.Label>
-      <Form.Control
-        type="file"
-        placeholder="Carica un file"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-          const file = e.dataTransfer.files[0];
-        }}
-      />
-    </Form.Group>
+      <Form.Group controlId="formFile" className="mb-3">
+        <Form.Label className="text-gold">File</Form.Label>
+        <Form.Control
+          type="file"
+          name="file"
+          onChange={handleFileChange}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+          }}
+        />
+      </Form.Group>
+      <Button type="submit" className="button-admin">
+        Aggiungi Film
+      </Button>
+    </Form>
   </div>
 );
 // Form per aggiungere una sezione
