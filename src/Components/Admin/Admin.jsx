@@ -344,7 +344,12 @@ const Admin = () => {
                     setSelectedSezioneId
                   )}
                 {/* Form per aggiungere un video */}
-                {showVideoForm && renderVideoForm()}
+                {showVideoForm &&
+                  renderVideoForm(
+                    sezioni,
+                    selectedSezioneId,
+                    setSelectedSezioneId
+                  )}
               </div>
             )}
           </Col>
@@ -542,35 +547,25 @@ const renderStagioneForm = (
 );
 
 //form per aggiungere un video
-const renderVideoForm = () => (
-  <div className="form-container">
-    <Form.Group controlId="formStagioneVideo" className="mb-3">
-      <Form.Label className="text-gold">Stagione</Form.Label>
-      <Form.Control type="text" placeholder="Inserisci il titolo" />
-    </Form.Group>
-
-    <Form.Group controlId="formTitoloVideo" className="mb-3">
-      <Form.Label className="text-gold">Titolo</Form.Label>
-      <Form.Control type="text" placeholder="Inserisci il titolo" />
-    </Form.Group>
-
-    <Form.Group controlId="formDurataVideo" className="mb-3">
-      <Form.Label className="text-gold">Durata</Form.Label>
-      <Form.Control type="text" placeholder="Inserisci la durata" />
-    </Form.Group>
-
-    <Form.Group controlId="formFileVideo" className="mb-3">
-      <Form.Label className="text-gold">File</Form.Label>
-      <Form.Control
-        type="file"
-        placeholder="Carica un file"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-          const file = e.dataTransfer.files[0];
-        }}
-      />
-    </Form.Group>
+const renderVideoForm = (sezioni, selectedSezioneId, setSelectedSezioneId) => (
+  <div className="form-container mt-3">
+    <Form>
+      <Form.Group controlId="formSezioneVideo">
+        <Form.Label>Sezione</Form.Label>
+        <Form.Control
+          as="select"
+          value={selectedSezioneId}
+          onChange={(e) => setSelectedSezioneId(e.target.value)}
+        >
+          <option value="">Seleziona una sezione</option>
+          {sezioni.map((sezione) => (
+            <option key={sezione.id} value={sezione.id}>
+              {sezione.titolo}
+            </option>
+          ))}
+        </Form.Control>
+      </Form.Group>
+    </Form>
   </div>
 );
 
