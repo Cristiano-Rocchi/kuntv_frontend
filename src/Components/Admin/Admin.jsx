@@ -34,6 +34,7 @@ const Admin = () => {
   const [showVideoForm, setShowVideoForm] = useState(false); // Form per aggiungere un video
   const [sezioni, setSezioni] = useState([]); // Stato per memorizzare le sezioni
   const [selectedSezioneId, setSelectedSezioneId] = useState(""); // Stato per memorizzare l'id della sezione selezionata
+  const [stagioni, setStagioni] = useState([]);
   // -------------------FUNZIONI DI VISUALIZZAZIONE-------------------
   // Funzione per mostrare/nascondere il form per aggiungere un FILM
   const toggleFilmForm = () => {
@@ -283,6 +284,33 @@ const Admin = () => {
     fetchSezioni();
   }, []);
 
+  const fetchStagioni = async (sezioneId) => {
+    console.log("Fetching stagioni for sezioneId:", sezioneId); // Debug
+    try {
+      const response = await fetch(
+        `http://localhost:3001/api/stagioni/sezione/${sezioneId}`,
+        {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzc4MjczNzEsImV4cCI6MTczODQzMjE3MSwic3ViIjoiYWRtaW4ifQ.6VY92sbGGql4txpwfp5IVFnnCmlyOki1YQiunuKazmr2pTVL5s5HLYq9Or2gHzYeg-iCz3D_8bUWTWViOmSFMw`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Stagioni ricevute:", data); // Debug
+        setStagioni(data); // Aggiorna lo stato con le stagioni
+      } else {
+        console.error(
+          "Errore durante il recupero delle stagioni:",
+          await response.text()
+        );
+      }
+    } catch (error) {
+      console.error("Errore nella richiesta:", error.message);
+    }
+  };
+
   return (
     <div className="body">
       <Container className="d-flex align-items-center m-auto pt-5">
@@ -348,7 +376,10 @@ const Admin = () => {
                   renderVideoForm(
                     sezioni,
                     selectedSezioneId,
-                    setSelectedSezioneId
+                    setSelectedSezioneId,
+                    stagioni,
+                    fetchStagioni,
+                    setStagioni
                   )}
               </div>
             )}
@@ -547,25 +578,56 @@ const renderStagioneForm = (
 );
 
 //form per aggiungere un video
-const renderVideoForm = (sezioni, selectedSezioneId, setSelectedSezioneId) => (
+const renderVideoForm = (
+  sezioni,
+  selectedSezioneId,
+  setSelectedSezioneId,
+  stagioni,
+  fetchStagioni,
+  setStagioni
+) => (
   <div className="form-container mt-3">
-    <Form>
-      <Form.Group controlId="formSezioneVideo">
-        <Form.Label>Sezione</Form.Label>
-        <Form.Control
-          as="select"
-          value={selectedSezioneId}
-          onChange={(e) => setSelectedSezioneId(e.target.value)}
-        >
-          <option value="">Seleziona una sezione</option>
-          {sezioni.map((sezione) => (
-            <option key={sezione.id} value={sezione.id}>
-              {sezione.titolo}
-            </option>
-          ))}
-        </Form.Control>
-      </Form.Group>
-    </Form>
+    {/* Dropdown per le sezioni */}
+    <Form.Group controlId="formSezioneVideo">
+      <Form.Label>Sezione</Form.Label>
+      <Form.Control
+        as="select"
+        value={selectedSezioneId}
+        onChange={(e) => {
+          const sezioneId = e.target.value;
+          setSelectedSezioneId(sezioneId);
+          if (sezioneId) {
+            fetchStagioni(sezioneId); // Carica le stagioni
+          } else {
+            setStagioni([]); // Resetta le stagioni
+          }
+        }}
+      >
+        <option value="">Seleziona una sezione</option>
+        {sezioni.map((sezione) => (
+          <option key={sezione.id} value={sezione.id}>
+            {sezione.titolo}
+          </option>
+        ))}
+      </Form.Control>
+    </Form.Group>
+
+    {/* Dropdown per le stagioni */}
+    {stagioni.length > 0 && (
+      <div className="form-container mt-3">
+        <Form.Group controlId="formStagione">
+          <Form.Label>Stagione</Form.Label>
+          <Form.Control as="select">
+            <option value="">Seleziona una stagione</option>
+            {stagioni.map((stagione) => (
+              <option key={stagione.id} value={stagione.id}>
+                {stagione.titolo}
+              </option>
+            ))}
+          </Form.Control>
+        </Form.Group>
+      </div>
+    )}
   </div>
 );
 
