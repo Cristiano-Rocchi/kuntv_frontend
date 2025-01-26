@@ -34,7 +34,6 @@ const Admin = () => {
   const [showVideoForm, setShowVideoForm] = useState(false); // Form per aggiungere un video
   const [sezioni, setSezioni] = useState([]); // Stato per memorizzare le sezioni
   const [selectedSezioneId, setSelectedSezioneId] = useState(""); // Stato per memorizzare l'id della sezione selezionata
-
   // -------------------FUNZIONI DI VISUALIZZAZIONE-------------------
   // Funzione per mostrare/nascondere il form per aggiungere un FILM
   const toggleFilmForm = () => {
@@ -118,7 +117,7 @@ const Admin = () => {
     }
   };
 
-  // -------------------INVIO DEL FORM-------------------
+  // -------------------FETCH-------------------
   // Funzione per gestire l'invio del form
   const handleFilmSubmit = async (e) => {
     e.preventDefault();
@@ -213,17 +212,19 @@ const Admin = () => {
   const handleStagioneSubmit = async (e) => {
     e.preventDefault();
 
-    // Validazione
+    // Validazione dei campi obbligatori
     if (!stagioneData.titolo || !stagioneData.anno || !selectedSezioneId) {
       alert("Compila tutti i campi obbligatori.");
       return;
     }
 
-    // Aggiorna `stagioneData` con il valore selezionato
+    // Preparazione del payload da inviare
     const dataToSubmit = {
       ...stagioneData,
-      sezioneId: selectedSezioneId,
+      sezioneId: selectedSezioneId, // Aggiunge l'ID della sezione selezionata
     };
+
+    console.log("Payload inviato:", dataToSubmit); // Debugging del payload
 
     try {
       const response = await fetch("http://localhost:3001/api/stagioni", {
@@ -238,7 +239,9 @@ const Admin = () => {
       if (response.ok) {
         const createdStagione = await response.json();
         console.log("Stagione creata con successo:", createdStagione);
-        setStagioneData({ titolo: "", anno: "", sezioneId: "" }); // Reset dello stato
+
+        // Reset dello stato
+        setStagioneData({ titolo: "", anno: "", sezioneId: "" });
         setSelectedSezioneId(""); // Reset della selezione
       } else {
         const errorMessage = await response.text();
@@ -246,9 +249,11 @@ const Admin = () => {
           "Errore durante la creazione della stagione:",
           errorMessage
         );
+        alert("Errore durante la creazione della stagione: " + errorMessage); // Notifica utente
       }
     } catch (error) {
       console.error("Errore nella richiesta:", error.message);
+      alert("Si è verificato un errore nella richiesta: " + error.message); // Notifica utente
     }
   };
 
@@ -335,7 +340,8 @@ const Admin = () => {
                     stagioneData,
                     handleStagioneInputChange,
                     sezioni,
-                    selectedSezioneId
+                    selectedSezioneId,
+                    setSelectedSezioneId
                   )}
                 {/* Form per aggiungere un video */}
                 {showVideoForm && renderVideoForm()}
@@ -486,7 +492,8 @@ const renderStagioneForm = (
   stagioneData,
   handleStagioneInputChange,
   sezioni,
-  selectedSezioneId
+  selectedSezioneId,
+  setSelectedSezioneId
 ) => (
   <div className="form-container mt-3">
     <Form onSubmit={handleStagioneSubmit}>
@@ -517,8 +524,8 @@ const renderStagioneForm = (
         <Form.Control
           as="select"
           name="sezioneId"
-          value={selectedSezioneId} // Usa `selectedSezioneId`
-          onChange={handleStagioneInputChange}
+          value={selectedSezioneId} // Valore corretto
+          onChange={(e) => setSelectedSezioneId(e.target.value)} // Gestisci il cambiamento
         >
           <option value="">Seleziona una sezione</option>
           {sezioni.map((sezione) => (
