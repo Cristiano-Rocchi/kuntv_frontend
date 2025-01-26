@@ -26,6 +26,13 @@ const Admin = () => {
     sezioneId: "",
   });
 
+  const [videoData, setVideoData] = useState({
+    titolo: "",
+    durata: "",
+    file: null,
+    stagioneId: "",
+  });
+
   // Stati per la gestione della visualizzazione dei form
   const [showFilmForm, setShowFilmForm] = useState(false); // Form per aggiungere un film
   const [showSerieTvOptions, setShowSerieTvOptions] = useState(false); // Opzioni per le Serie TV
@@ -116,6 +123,20 @@ const Admin = () => {
         [name]: value,
       });
     }
+  };
+  const handleVideoInputChange = (e) => {
+    const { name, value } = e.target;
+    setVideoData({
+      ...videoData,
+      [name]: value,
+    });
+  };
+
+  const handleVideoFileChange = (e) => {
+    setVideoData({
+      ...videoData,
+      file: e.target.files[0],
+    });
   };
 
   // -------------------FETCH-------------------
@@ -257,6 +278,50 @@ const Admin = () => {
       alert("Si è verificato un errore nella richiesta: " + error.message); // Notifica utente
     }
   };
+  const handleVideoSubmit = async (e) => {
+    e.preventDefault();
+
+    if (
+      !videoData.titolo ||
+      !videoData.durata ||
+      !videoData.file ||
+      !videoData.stagioneId
+    ) {
+      alert("Compila tutti i campi obbligatori.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("titolo", videoData.titolo);
+    formData.append("durata", videoData.durata);
+    formData.append("file", videoData.file);
+    formData.append("stagioneId", videoData.stagioneId);
+
+    try {
+      const response = await fetch("http://localhost:3001/api/video/upload", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzc4MjczNzEsImV4cCI6MTczODQzMjE3MSwic3ViIjoiYWRtaW4ifQ.6VY92sbGGql4txpwfp5IVFnnCmlyOki1YQiunuKazmr2pTVL5s5HLYq9Or2gHzYeg-iCz3D_8bUWTWViOmSFMw`,
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const createdVideo = await response.json();
+        console.log("Video creato con successo:", createdVideo);
+
+        // Resetta i dati del form video
+        setVideoData({ titolo: "", durata: "", file: null, stagioneId: "" });
+      } else {
+        console.error(
+          "Errore durante la creazione del video:",
+          await response.text()
+        );
+      }
+    } catch (error) {
+      console.error("Errore nella richiesta:", error.message);
+    }
+  };
 
   // Effettua una richiesta per ottenere le sezioni
   useEffect(() => {
@@ -379,7 +444,12 @@ const Admin = () => {
                     setSelectedSezioneId,
                     stagioni,
                     fetchStagioni,
-                    setStagioni
+                    setStagioni,
+                    videoData,
+                    setVideoData,
+                    handleVideoInputChange,
+                    handleVideoFileChange,
+                    handleVideoSubmit
                   )}
               </div>
             )}
@@ -584,7 +654,12 @@ const renderVideoForm = (
   setSelectedSezioneId,
   stagioni,
   fetchStagioni,
-  setStagioni
+  setStagioni,
+  videoData,
+  setVideoData,
+  handleVideoInputChange,
+  handleVideoFileChange,
+  handleVideoSubmit
 ) => (
   <div className="form-container mt-3">
     {/* Dropdown per le sezioni */}
@@ -614,18 +689,60 @@ const renderVideoForm = (
 
     {/* Dropdown per le stagioni */}
     {stagioni.length > 0 && (
-      <div className="form-container mt-3">
-        <Form.Group controlId="formStagione">
-          <Form.Label>Stagione</Form.Label>
-          <Form.Control as="select">
-            <option value="">Seleziona una stagione</option>
-            {stagioni.map((stagione) => (
-              <option key={stagione.id} value={stagione.id}>
-                {stagione.titolo}
-              </option>
-            ))}
-          </Form.Control>
-        </Form.Group>
+      <Form.Group controlId="formStagioneVideo" className="mt-3">
+        <Form.Label>Stagione</Form.Label>
+        <Form.Control
+          as="select"
+          value={videoData.stagioneId}
+          onChange={(e) =>
+            setVideoData({ ...videoData, stagioneId: e.target.value })
+          }
+        >
+          <option value="">Seleziona una stagione</option>
+          {stagioni.map((stagione) => (
+            <option key={stagione.id} value={stagione.id}>
+              {stagione.titolo}
+            </option>
+          ))}
+        </Form.Control>
+      </Form.Group>
+    )}
+
+    {/* Form per aggiungere il video */}
+    {videoData.stagioneId && (
+      <div className="mt-3">
+        <Form onSubmit={handleVideoSubmit}>
+          <Form.Group controlId="formTitoloVideo" className="mb-3">
+            <Form.Label>Titolo</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Inserisci il titolo"
+              name="titolo"
+              value={videoData.titolo}
+              onChange={handleVideoInputChange}
+            />
+          </Form.Group>
+
+          <Form.Group controlId="formDurataVideo" className="mb-3">
+            <Form.Label>Durata</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Inserisci la durata"
+              name="durata"
+              value={videoData.durata}
+              onChange={handleVideoInputChange}
+            />
+          </Form.Group>
+
+          <Form.Group controlId="formFileVideo" className="mb-3">
+            <Form.Label>File</Form.Label>
+            <Form.Control type="file" onChange={handleVideoFileChange} />
+          </Form.Group>
+
+          <Button type="submit" className="button-admin">
+            Invia Video
+          </Button>
+        </Form>
       </div>
     )}
   </div>
