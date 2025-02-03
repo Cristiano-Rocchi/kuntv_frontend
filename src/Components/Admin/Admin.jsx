@@ -210,7 +210,7 @@ const Admin = () => {
     // Validazione dei campi
     if (
       !sezioneData.titolo ||
-      !sezioneData.tag ||
+      sezioneData.tag.length === 0 ||
       !sezioneData.anno ||
       !sezioneData.file
     ) {
@@ -218,22 +218,18 @@ const Admin = () => {
       return;
     }
 
-    // Creazione del FormData
     const formData = new FormData();
     formData.append("titolo", sezioneData.titolo);
-
-    // 🔥 Assicuriamoci che `tag` sia sempre un array prima di convertirlo in JSON
-    formData.append(
-      "tag",
-      JSON.stringify(
-        Array.isArray(sezioneData.tag) ? sezioneData.tag : [sezioneData.tag]
-      )
-    );
+    formData.append("tag", sezioneData.tag.join(","));
 
     formData.append("anno", sezioneData.anno);
     formData.append("file", sezioneData.file);
 
-    // Invio della richiesta
+    // 🔥 Aggiungi log per vedere cosa viene effettivamente inviato
+    for (let pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
     try {
       const response = await fetch("http://localhost:3001/api/sezioni", {
         method: "POST",
@@ -244,16 +240,10 @@ const Admin = () => {
       });
 
       if (response.ok) {
-        const createdSezione = await response.json();
-        console.log("Sezione creata con successo:", createdSezione);
-
-        // 🔥 Reset con array vuoto per i tag
-        setSezioneData({ titolo: "", tag: [], anno: "", file: null });
+        console.log("Sezione creata con successo!");
+        setSezioneData({ titolo: "", tag: [], anno: "", file: null }); // Reset form
       } else {
-        console.error(
-          "Errore durante la creazione della sezione:",
-          await response.text()
-        );
+        console.error("Errore durante la creazione:", await response.text());
       }
     } catch (error) {
       console.error("Errore nella richiesta:", error.message);
