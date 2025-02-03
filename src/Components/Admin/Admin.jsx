@@ -24,6 +24,7 @@ const Admin = () => {
     titolo: "",
     anno: "",
     sezioneId: "",
+    file: null, // Aggiunto per la copertina della stagione
   });
 
   const [videoData, setVideoData] = useState({
@@ -126,11 +127,12 @@ const Admin = () => {
   };
 
   const handleStagioneFileChange = (e) => {
-    setSezioneData({
-      ...sezioneData,
-      file: e.target.files[0],
+    setStagioneData({
+      ...stagioneData,
+      file: e.target.files[0], // Salva il file selezionato
     });
   };
+
   // Funzione per gestire i cambiamenti degli input in STAGIONE
   const handleStagioneInputChange = (e) => {
     const { name, value } = e.target;
@@ -260,22 +262,29 @@ const Admin = () => {
       return;
     }
 
-    // Preparazione del payload da inviare
-    const dataToSubmit = {
-      ...stagioneData,
-      sezioneId: selectedSezioneId, // Aggiunge l'ID della sezione selezionata
-    };
+    // Creazione del FormData per inviare l'immagine e i dati della stagione
+    const formData = new FormData();
+    formData.append(
+      "data",
+      JSON.stringify({
+        titolo: stagioneData.titolo,
+        anno: stagioneData.anno,
+        sezioneId: selectedSezioneId,
+      })
+    );
+    if (stagioneData.file) {
+      formData.append("immagine", stagioneData.file);
+    }
 
-    console.log("Payload inviato:", dataToSubmit); // Debugging del payload
+    console.log("Payload inviato:", [...formData.entries()]); // Debugging
 
     try {
       const response = await fetch("http://localhost:3001/api/stagioni", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
         },
-        body: JSON.stringify(dataToSubmit),
+        body: formData, // Invio il FormData
       });
 
       if (response.ok) {
@@ -283,7 +292,7 @@ const Admin = () => {
         console.log("Stagione creata con successo:", createdStagione);
 
         // Reset dello stato
-        setStagioneData({ titolo: "", anno: "", sezioneId: "" });
+        setStagioneData({ titolo: "", anno: "", sezioneId: "", file: null });
         setSelectedSezioneId(""); // Reset della selezione
       } else {
         const errorMessage = await response.text();
@@ -291,13 +300,14 @@ const Admin = () => {
           "Errore durante la creazione della stagione:",
           errorMessage
         );
-        alert("Errore durante la creazione della stagione: " + errorMessage); // Notifica utente
+        alert("Errore durante la creazione della stagione: " + errorMessage);
       }
     } catch (error) {
       console.error("Errore nella richiesta:", error.message);
-      alert("Si è verificato un errore nella richiesta: " + error.message); // Notifica utente
+      alert("Si è verificato un errore nella richiesta: " + error.message);
     }
   };
+
   const handleVideoSubmit = async (e) => {
     e.preventDefault();
 
