@@ -43,6 +43,7 @@ const Admin = () => {
   const [selectedSezioneId, setSelectedSezioneId] = useState(""); // Stato per memorizzare l'id della sezione selezionata
   const [stagioni, setStagioni] = useState([]);
   const [tagOptions, setTagOptions] = useState([]);
+  const [showTagList, setShowTagList] = useState(false);
 
   // -------------------FUNZIONI DI VISUALIZZAZIONE-------------------
   // Funzione per mostrare/nascondere il form per aggiungere un FILM
@@ -468,7 +469,9 @@ const Admin = () => {
                     handleSezioneInputChange,
                     handleSezioneFileChange,
                     tagOptions,
-                    handleSezioneTagChange
+                    handleSezioneTagChange,
+                    showTagList,
+                    setShowTagList
                   )}
                 {/* Form per aggiungere una stagione */}
                 {showStagioneForm &&
@@ -586,9 +589,11 @@ const renderSezioneForm = (
   handleSezioneInputChange,
   handleSezioneFileChange,
   tagOptions,
-  handleSezioneTagChange
+  handleSezioneTagChange,
+  showTagList,
+  setShowTagList
 ) => (
-  <div className="form-container mt-3">
+  <div className="mt-3">
     <Form onSubmit={handleSezioneSubmit}>
       <Form.Group controlId="formTitoloSezione" className="mb-3">
         <Form.Label>Titolo</Form.Label>
@@ -603,18 +608,29 @@ const renderSezioneForm = (
 
       <Form.Group controlId="formTagSezione" className="mb-3">
         <Form.Label>Tag</Form.Label>
-        <div>
-          {tagOptions.map((tag) => (
-            <Form.Check
-              key={tag}
-              type="checkbox"
-              label={tag}
-              value={tag}
-              checked={sezioneData.tag.includes(tag)}
-              onChange={handleSezioneTagChange}
-            />
-          ))}
-        </div>
+        <Button onClick={() => setShowTagList(!showTagList)} className="w-100">
+          {sezioneData.tag.length > 0
+            ? sezioneData.tag.join(", ")
+            : "Seleziona i tag"}
+        </Button>
+
+        {showTagList && (
+          <div>
+            <div className="d-flex flex-wrap">
+              {tagOptions.map((tag) => (
+                <div key={tag} className="p-2" style={{ width: "33%" }}>
+                  <Form.Check
+                    type="checkbox"
+                    label={tag}
+                    value={tag}
+                    checked={sezioneData.tag.includes(tag)}
+                    onChange={handleSezioneTagChange}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </Form.Group>
 
       <Form.Group controlId="formAnnoSezione" className="mb-3">
