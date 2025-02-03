@@ -15,7 +15,7 @@ const Admin = () => {
   // stato per gestire i dati del form di aggiunta SEZIONE
   const [sezioneData, setSezioneData] = useState({
     titolo: "",
-    tag: "",
+    tag: [],
     anno: "",
     file: null,
   });
@@ -42,6 +42,8 @@ const Admin = () => {
   const [sezioni, setSezioni] = useState([]); // Stato per memorizzare le sezioni
   const [selectedSezioneId, setSelectedSezioneId] = useState(""); // Stato per memorizzare l'id della sezione selezionata
   const [stagioni, setStagioni] = useState([]);
+  const [tagOptions, setTagOptions] = useState([]);
+
   // -------------------FUNZIONI DI VISUALIZZAZIONE-------------------
   // Funzione per mostrare/nascondere il form per aggiungere un FILM
   const toggleFilmForm = () => {
@@ -112,6 +114,22 @@ const Admin = () => {
       file: e.target.files[0],
     });
   };
+  const handleSezioneTagChange = (e) => {
+    const { value, checked } = e.target;
+    setSezioneData((prevData) => ({
+      ...prevData,
+      tag: checked
+        ? [...prevData.tag, value] // Aggiunge il tag se selezionato
+        : prevData.tag.filter((tag) => tag !== value), // Rimuove il tag se deselezionato
+    }));
+  };
+
+  const handleStagioneFileChange = (e) => {
+    setSezioneData({
+      ...sezioneData,
+      file: e.target.files[0],
+    });
+  };
   // Funzione per gestire i cambiamenti degli input in STAGIONE
   const handleStagioneInputChange = (e) => {
     const { name, value } = e.target;
@@ -167,7 +185,7 @@ const Admin = () => {
       const response = await fetch("http://localhost:3001/api/film/upload", {
         method: "POST",
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzc4MjczNzEsImV4cCI6MTczODQzMjE3MSwic3ViIjoiYWRtaW4ifQ.6VY92sbGGql4txpwfp5IVFnnCmlyOki1YQiunuKazmr2pTVL5s5HLYq9Or2gHzYeg-iCz3D_8bUWTWViOmSFMw`,
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
         },
         body: formData,
       });
@@ -203,7 +221,15 @@ const Admin = () => {
     // Creazione del FormData
     const formData = new FormData();
     formData.append("titolo", sezioneData.titolo);
-    formData.append("tag", sezioneData.tag);
+
+    // 🔥 Assicuriamoci che `tag` sia sempre un array prima di convertirlo in JSON
+    formData.append(
+      "tag",
+      JSON.stringify(
+        Array.isArray(sezioneData.tag) ? sezioneData.tag : [sezioneData.tag]
+      )
+    );
+
     formData.append("anno", sezioneData.anno);
     formData.append("file", sezioneData.file);
 
@@ -212,7 +238,7 @@ const Admin = () => {
       const response = await fetch("http://localhost:3001/api/sezioni", {
         method: "POST",
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzc4MjczNzEsImV4cCI6MTczODQzMjE3MSwic3ViIjoiYWRtaW4ifQ.6VY92sbGGql4txpwfp5IVFnnCmlyOki1YQiunuKazmr2pTVL5s5HLYq9Or2gHzYeg-iCz3D_8bUWTWViOmSFMw`,
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
         },
         body: formData,
       });
@@ -220,7 +246,9 @@ const Admin = () => {
       if (response.ok) {
         const createdSezione = await response.json();
         console.log("Sezione creata con successo:", createdSezione);
-        setSezioneData({ titolo: "", tag: "", anno: "", file: null }); // Reset dello stato
+
+        // 🔥 Reset con array vuoto per i tag
+        setSezioneData({ titolo: "", tag: [], anno: "", file: null });
       } else {
         console.error(
           "Errore durante la creazione della sezione:",
@@ -231,6 +259,7 @@ const Admin = () => {
       console.error("Errore nella richiesta:", error.message);
     }
   };
+
   const handleStagioneSubmit = async (e) => {
     e.preventDefault();
 
@@ -253,7 +282,7 @@ const Admin = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzc4MjczNzEsImV4cCI6MTczODQzMjE3MSwic3ViIjoiYWRtaW4ifQ.6VY92sbGGql4txpwfp5IVFnnCmlyOki1YQiunuKazmr2pTVL5s5HLYq9Or2gHzYeg-iCz3D_8bUWTWViOmSFMw`,
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
         },
         body: JSON.stringify(dataToSubmit),
       });
@@ -301,7 +330,7 @@ const Admin = () => {
       const response = await fetch("http://localhost:3001/api/video/upload", {
         method: "POST",
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzc4MjczNzEsImV4cCI6MTczODQzMjE3MSwic3ViIjoiYWRtaW4ifQ.6VY92sbGGql4txpwfp5IVFnnCmlyOki1YQiunuKazmr2pTVL5s5HLYq9Or2gHzYeg-iCz3D_8bUWTWViOmSFMw`,
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
         },
         body: formData,
       });
@@ -323,13 +352,13 @@ const Admin = () => {
     }
   };
 
-  // Effettua una richiesta per ottenere le sezioni
+  // Effettua una richiesta per ottenere le SEZIONI
   useEffect(() => {
     const fetchSezioni = async () => {
       try {
         const response = await fetch("http://localhost:3001/api/sezioni", {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzc4MjczNzEsImV4cCI6MTczODQzMjE3MSwic3ViIjoiYWRtaW4ifQ.6VY92sbGGql4txpwfp5IVFnnCmlyOki1YQiunuKazmr2pTVL5s5HLYq9Or2gHzYeg-iCz3D_8bUWTWViOmSFMw`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
           },
         });
         if (response.ok) {
@@ -356,7 +385,7 @@ const Admin = () => {
         `http://localhost:3001/api/stagioni/sezione/${sezioneId}`,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzc4MjczNzEsImV4cCI6MTczODQzMjE3MSwic3ViIjoiYWRtaW4ifQ.6VY92sbGGql4txpwfp5IVFnnCmlyOki1YQiunuKazmr2pTVL5s5HLYq9Or2gHzYeg-iCz3D_8bUWTWViOmSFMw`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
           },
         }
       );
@@ -375,6 +404,29 @@ const Admin = () => {
       console.error("Errore nella richiesta:", error.message);
     }
   };
+  // Effettua una richiesta per gli ENUM TAG in SEZIONE
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/sezioni/tags", {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setTagOptions(data);
+        } else {
+          console.error("Errore nel recupero dei tag:", await response.text());
+        }
+      } catch (error) {
+        console.error("Errore nella richiesta API per i tag:", error.message);
+      }
+    };
+
+    fetchTags();
+  }, []);
 
   return (
     <div className="body">
@@ -424,7 +476,9 @@ const Admin = () => {
                     handleSezioneSubmit,
                     sezioneData,
                     handleSezioneInputChange,
-                    handleSezioneFileChange
+                    handleSezioneFileChange,
+                    tagOptions,
+                    handleSezioneTagChange
                   )}
                 {/* Form per aggiungere una stagione */}
                 {showStagioneForm &&
@@ -434,7 +488,8 @@ const Admin = () => {
                     handleStagioneInputChange,
                     sezioni,
                     selectedSezioneId,
-                    setSelectedSezioneId
+                    setSelectedSezioneId,
+                    handleStagioneFileChange
                   )}
                 {/* Form per aggiungere un video */}
                 {showVideoForm &&
@@ -539,7 +594,9 @@ const renderSezioneForm = (
   handleSezioneSubmit,
   sezioneData,
   handleSezioneInputChange,
-  handleSezioneFileChange
+  handleSezioneFileChange,
+  tagOptions,
+  handleSezioneTagChange
 ) => (
   <div className="form-container mt-3">
     <Form onSubmit={handleSezioneSubmit}>
@@ -556,13 +613,18 @@ const renderSezioneForm = (
 
       <Form.Group controlId="formTagSezione" className="mb-3">
         <Form.Label>Tag</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="Inserisci il tag"
-          name="tag"
-          value={sezioneData.tag}
-          onChange={handleSezioneInputChange}
-        />
+        <div>
+          {tagOptions.map((tag) => (
+            <Form.Check
+              key={tag}
+              type="checkbox"
+              label={tag}
+              value={tag}
+              checked={sezioneData.tag.includes(tag)}
+              onChange={handleSezioneTagChange}
+            />
+          ))}
+        </div>
       </Form.Group>
 
       <Form.Group controlId="formAnnoSezione" className="mb-3">
@@ -599,7 +661,8 @@ const renderStagioneForm = (
   handleStagioneInputChange,
   sezioni,
   selectedSezioneId,
-  setSelectedSezioneId
+  setSelectedSezioneId,
+  handleStagioneFileChange
 ) => (
   <div className="form-container mt-3">
     <Form onSubmit={handleStagioneSubmit}>
@@ -622,6 +685,15 @@ const renderStagioneForm = (
           name="anno"
           value={stagioneData.anno}
           onChange={handleStagioneInputChange}
+        />
+      </Form.Group>
+
+      <Form.Group controlId="formFileStagione" className="mb-3">
+        <Form.Label>Copertina</Form.Label>
+        <Form.Control
+          type="file"
+          name="file"
+          onChange={handleStagioneFileChange}
         />
       </Form.Group>
 
