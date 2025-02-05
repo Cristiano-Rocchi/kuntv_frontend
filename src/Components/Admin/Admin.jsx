@@ -101,6 +101,7 @@ const Admin = () => {
       file: e.target.files[0],
     });
   };
+
   // Funzione per gestire i cambiamenti degli input in SEZIONE
   const handleSezioneInputChange = (e) => {
     const { name, value } = e.target;
@@ -109,6 +110,7 @@ const Admin = () => {
       [name]: value,
     });
   };
+
   // Funzione per gestire il caricamento del file in SEZIONE
   const handleSezioneFileChange = (e) => {
     setSezioneData({
@@ -116,6 +118,7 @@ const Admin = () => {
       file: e.target.files[0],
     });
   };
+  // Funzione per gestire i cambiamenti degli input in SEZIONE
   const handleSezioneTagChange = (e) => {
     const { value, checked } = e.target;
     setSezioneData((prevData) => ({
@@ -125,7 +128,7 @@ const Admin = () => {
         : prevData.tag.filter((tag) => tag !== value), // Rimuove il tag se deselezionato
     }));
   };
-
+  // Funzione per gestire i cambiamenti degli input in STAGIONE
   const handleStagioneFileChange = (e) => {
     const file = e.target.files[0];
 
@@ -156,6 +159,8 @@ const Admin = () => {
       [name]: value,
     });
   };
+
+  // Funzione per gestire il caricamento del file VIDEO
 
   const handleVideoFileChange = (e) => {
     setVideoData({
@@ -211,6 +216,7 @@ const Admin = () => {
       console.error("Errore nella richiesta:", error.message);
     }
   };
+
   const handleSezioneSubmit = async (e) => {
     e.preventDefault();
 
@@ -323,6 +329,7 @@ const Admin = () => {
     }
   };
 
+  // Funzione per la creazione di un nuovo VIDEO
   const handleVideoSubmit = async (e) => {
     e.preventDefault();
 
@@ -394,6 +401,7 @@ const Admin = () => {
     fetchSezioni();
   }, []);
 
+  // effettua una richiesta per ottenere le STAGIONI
   const fetchStagioni = async (sezioneId) => {
     console.log("Fetching stagioni for sezioneId:", sezioneId); // Debug
     try {
