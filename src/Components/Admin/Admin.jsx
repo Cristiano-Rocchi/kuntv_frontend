@@ -127,10 +127,14 @@ const Admin = () => {
   };
 
   const handleStagioneFileChange = (e) => {
-    setStagioneData({
-      ...stagioneData,
-      file: e.target.files[0], // Salva il file selezionato
-    });
+    const file = e.target.files[0];
+
+    console.log("📂 File selezionato:", file ? file.name : "Nessun file");
+
+    setStagioneData((prevState) => ({
+      ...prevState,
+      file: file,
+    }));
   };
 
   // Funzione per gestire i cambiamenti degli input in STAGIONE
@@ -262,34 +266,45 @@ const Admin = () => {
       return;
     }
 
-    // Creazione del FormData per inviare l'immagine e i dati della stagione
+    // Creazione del FormData
     const formData = new FormData();
-    formData.append(
-      "data",
-      JSON.stringify({
-        titolo: stagioneData.titolo,
-        anno: stagioneData.anno,
-        sezioneId: selectedSezioneId,
-      })
-    );
+    formData.append("titolo", stagioneData.titolo);
+    formData.append("anno", stagioneData.anno);
+    formData.append("sezioneId", selectedSezioneId);
+
     if (stagioneData.file) {
-      formData.append("immagine", stagioneData.file);
+      formData.append("immagine", stagioneData.file); // 🔥 Cambiato da "file" a "immagine"
     }
 
-    console.log("Payload inviato:", [...formData.entries()]); // Debugging
+    // 🔥 Debugging: Log del FormData
+    console.log("📦 Payload inviato:");
+    for (let pair of formData.entries()) {
+      if (pair[1] instanceof File) {
+        console.log(
+          `   🖼️ ${pair[0]}:`,
+          pair[1].name,
+          "| Tipo:",
+          pair[1].type,
+          "| Dimensione:",
+          pair[1].size
+        );
+      } else {
+        console.log(`   📝 ${pair[0]}:`, pair[1]);
+      }
+    }
 
     try {
       const response = await fetch("http://localhost:3001/api/stagioni", {
         method: "POST",
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`, // Token corretto
         },
-        body: formData, // Invio il FormData
+        body: formData,
       });
 
       if (response.ok) {
         const createdStagione = await response.json();
-        console.log("Stagione creata con successo:", createdStagione);
+        console.log("✅ Stagione creata con successo:", createdStagione);
 
         // Reset dello stato
         setStagioneData({ titolo: "", anno: "", sezioneId: "", file: null });
@@ -297,13 +312,13 @@ const Admin = () => {
       } else {
         const errorMessage = await response.text();
         console.error(
-          "Errore durante la creazione della stagione:",
+          "❌ Errore durante la creazione della stagione:",
           errorMessage
         );
         alert("Errore durante la creazione della stagione: " + errorMessage);
       }
     } catch (error) {
-      console.error("Errore nella richiesta:", error.message);
+      console.error("❌ Errore nella richiesta:", error.message);
       alert("Si è verificato un errore nella richiesta: " + error.message);
     }
   };
