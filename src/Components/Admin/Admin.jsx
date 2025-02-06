@@ -50,9 +50,9 @@ const Admin = () => {
   const [showVideoForm, setShowVideoForm] = useState(false); // Form per aggiungere un video
   const [sezioni, setSezioni] = useState([]); // Stato per memorizzare le sezioni
   const [selectedSezioneId, setSelectedSezioneId] = useState(""); // Stato per memorizzare l'id della sezione selezionata
-  const [stagioni, setStagioni] = useState([]);
-  const [tagOptions, setTagOptions] = useState([]);
-  const [showTagList, setShowTagList] = useState(false);
+  const [stagioni, setStagioni] = useState([]); // Stato per memorizzare le stagioni
+  const [tagOptions, setTagOptions] = useState([]); // Stato per memorizzare le opzioni di tag(generi video)
+  const [showTagList, setShowTagList] = useState(false); // Stato per mostrare/nascondere la lista dei tag
   const [isUploading, setIsUploading] = useState(false); // Stato per indicare l'upload in corso
   const [progress, setProgress] = useState(0); // Stato per il progresso dell'upload
   const [uploadPhase, setUploadPhase] = useState(""); // Stato per la fase dell'upload
@@ -187,46 +187,89 @@ const Admin = () => {
   const handleFilmSubmit = async (e) => {
     e.preventDefault();
 
-    // Validazione dei campi
     if (
       !filmData.titolo ||
       !filmData.genere ||
       !filmData.durata ||
       !filmData.file
     ) {
-      alert("Compila tutti i campi obbligatori.");
+      alert("⚠️ Compila tutti i campi obbligatori.");
       return;
     }
 
-    // Creo un oggetto FormData per inviare i dati
+    setProgress(0);
+    setIsUploading(true);
+    setUploadPhase("Compressione in corso...");
+    setUploadComplete(false);
+
+    // Simula la compressione (0% -> 50%)
+    for (let i = 0; i <= 50; i += 10) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setProgress(i);
+    }
+
     const formData = new FormData();
     formData.append("titolo", filmData.titolo);
     formData.append("genere", filmData.genere);
     formData.append("durata", filmData.durata);
     formData.append("file", filmData.file);
 
-    // -----------FETCH-----------
     try {
-      const response = await fetch("http://localhost:3001/api/film/upload", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
-        },
-        body: formData,
-      });
+      setUploadPhase("Caricamento in corso...");
+      cancelTokenSource.current = axios.CancelToken.source();
 
-      if (response.ok) {
-        const createdFilm = await response.json();
-        console.log("Film creato con successo:", createdFilm);
-        setFilmData({ titolo: "", genere: "", durata: "", file: null }); // Reset dello stato
+      const response = await axios.post(
+        "http://localhost:3001/api/film/upload",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 50) / progressEvent.total + 50
+            );
+            setProgress(percentCompleted);
+          },
+          cancelToken: cancelTokenSource.current.token,
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        console.log("✅ Film caricato con successo:", response.data);
+        setUploadPhase("✅ Caricamento completato con successo!");
+        setUploadComplete(true);
+
+        // 🔥 Mostra alert di successo
+        alert("✅ Film caricato con successo!");
+
+        // ✅ Svuota tutti i campi del form
+        setFilmData({ titolo: "", genere: "", durata: "", file: null });
+
+        // ✅ Svuota il file input manualmente
+        document.getElementById("formFileFilm").value = "";
+
+        setTimeout(() => {
+          setIsUploading(false);
+          setProgress(0);
+        }, 2000);
       } else {
-        console.error(
-          "Errore durante la creazione del film:",
-          await response.text()
-        );
+        console.error("Errore durante la creazione del film:", response.data);
+        setUploadPhase("❌ Errore nel caricamento!");
+        setIsUploading(false);
+        alert("❌ Errore durante il caricamento del film!");
       }
     } catch (error) {
-      console.error("Errore nella richiesta:", error.message);
+      if (axios.isCancel(error)) {
+        setUploadPhase("⛔ Upload annullato!");
+        alert("⛔ Upload annullato!");
+      } else {
+        console.error("Errore nella richiesta:", error.message);
+        setUploadPhase("❌ Errore nella richiesta!");
+        alert(`❌ Errore: ${error.message}`);
+      }
+      setIsUploading(false);
     }
   };
 
@@ -353,7 +396,7 @@ const Admin = () => {
       !videoData.file ||
       !videoData.stagioneId
     ) {
-      alert("Compila tutti i campi obbligatori.");
+      alert("⚠️ Compila tutti i campi obbligatori.");
       return;
     }
 
@@ -395,11 +438,14 @@ const Admin = () => {
         }
       );
 
-      // ✅ Controlliamo sia 200 che 201 come successo
+      // ✅ Se lo status è 200 o 201, mostriamo un alert di successo
       if (response.status === 200 || response.status === 201) {
         console.log("✅ Video caricato con successo:", response.data);
         setUploadPhase("✅ Caricamento completato con successo!");
         setUploadComplete(true);
+
+        // 🔥 Mostra alert di successo
+        alert("✅ Video caricato con successo!");
 
         setVideoData({ titolo: "", durata: "", file: null, stagioneId: "" });
 
@@ -413,13 +459,20 @@ const Admin = () => {
         console.error("Errore durante la creazione del video:", response.data);
         setUploadPhase("❌ Errore nel caricamento!");
         setIsUploading(false);
+
+        // 🔥 Mostra alert di errore
+        alert("❌ Errore durante il caricamento del video!");
       }
     } catch (error) {
       if (axios.isCancel(error)) {
         setUploadPhase("⛔ Upload annullato!");
+        alert("⛔ Upload annullato!");
       } else {
         console.error("Errore nella richiesta:", error.message);
         setUploadPhase("❌ Errore nella richiesta!");
+
+        // 🔥 Mostra alert di errore con il messaggio dettagliato
+        alert(`❌ Errore: ${error.message}`);
       }
       setIsUploading(false);
     }
@@ -522,7 +575,12 @@ const Admin = () => {
                 filmData,
                 handleFilmInputChange,
                 handleFileChange,
-                handleFilmSubmit
+                handleFilmSubmit,
+                isUploading,
+                progress,
+                uploadPhase,
+                uploadComplete,
+                cancelTokenSource
               )}
             {/* Bottoni per aggiungere Serie TV */}
             {showSerieTvOptions && (
@@ -614,7 +672,12 @@ const renderFilmForm = (
   filmData,
   handleFilmInputChange,
   handleFileChange,
-  handleFilmSubmit
+  handleFilmSubmit,
+  isUploading,
+  progress,
+  uploadPhase,
+  uploadComplete,
+  cancelTokenSource
 ) => (
   <div className="form-container">
     <Form onSubmit={handleFilmSubmit}>
@@ -651,25 +714,45 @@ const renderFilmForm = (
         />
       </Form.Group>
 
-      <Form.Group controlId="formFile" className="mb-3">
+      <Form.Group controlId="formFileFilm" className="mb-3">
         <Form.Label className="text-gold">File</Form.Label>
-        <Form.Control
-          type="file"
-          name="file"
-          onChange={handleFileChange}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            const file = e.dataTransfer.files[0];
-          }}
-        />
+        <Form.Control type="file" name="file" onChange={handleFileChange} />
       </Form.Group>
-      <Button type="submit" className="button-admin">
-        Aggiungi Film
+
+      {/* Pulsante di invio disabilitato durante l'upload */}
+      <Button type="submit" className="button-admin" disabled={isUploading}>
+        {isUploading ? "Caricamento..." : "Aggiungi Film"}
       </Button>
+
+      {/* Bottone "Stop" per annullare l'upload */}
+      {isUploading && (
+        <Button
+          variant="danger"
+          className="ml-2"
+          onClick={() => {
+            if (cancelTokenSource.current) cancelTokenSource.current.cancel();
+          }}
+        >
+          Stop
+        </Button>
+      )}
+
+      {/* Barra di caricamento */}
+      {isUploading && (
+        <div className="mt-3">
+          <p>{uploadPhase}</p>
+          <ProgressBar now={progress} label={`${progress}%`} />
+        </div>
+      )}
+
+      {/* Messaggio di successo dopo il caricamento */}
+      {uploadComplete && (
+        <div className="mt-3 text-success">✅ Film caricato con successo!</div>
+      )}
     </Form>
   </div>
 );
+
 // Form per aggiungere una sezione
 const renderSezioneForm = (
   handleSezioneSubmit,
