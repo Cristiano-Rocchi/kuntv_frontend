@@ -343,6 +343,16 @@ const Admin = () => {
       return;
     }
 
+    setProgress(0);
+    setIsUploading(true);
+
+    // Simula la compressione (dal 0% al 50%)
+    setUploadPhase("Compressione in corso...");
+    for (let i = 0; i <= 50; i += 10) {
+      await new Promise((resolve) => setTimeout(resolve, 300)); // Simula la compressione
+      setProgress(i);
+    }
+
     const formData = new FormData();
     formData.append("titolo", videoData.titolo);
     formData.append("durata", videoData.durata);
@@ -350,6 +360,8 @@ const Admin = () => {
     formData.append("stagioneId", videoData.stagioneId);
 
     try {
+      setUploadPhase("Caricamento in corso...");
+
       const response = await fetch("http://localhost:3001/api/video/upload", {
         method: "POST",
         headers: {
@@ -362,6 +374,18 @@ const Admin = () => {
         const createdVideo = await response.json();
         console.log("Video creato con successo:", createdVideo);
 
+        // Simula il progresso dell'upload (dal 50% al 100%)
+        for (let i = 50; i <= 100; i += 10) {
+          await new Promise((resolve) => setTimeout(resolve, 300)); // Simula il caricamento
+          setProgress(i);
+        }
+
+        setUploadPhase("Caricamento completato!");
+        setTimeout(() => {
+          setIsUploading(false);
+          setProgress(0);
+        }, 2000);
+
         // Resetta i dati del form video
         setVideoData({ titolo: "", durata: "", file: null, stagioneId: "" });
       } else {
@@ -369,9 +393,13 @@ const Admin = () => {
           "Errore durante la creazione del video:",
           await response.text()
         );
+        setUploadPhase("Errore nel caricamento!");
+        setIsUploading(false);
       }
     } catch (error) {
       console.error("Errore nella richiesta:", error.message);
+      setUploadPhase("Errore nella richiesta!");
+      setIsUploading(false);
     }
   };
 
@@ -530,7 +558,10 @@ const Admin = () => {
                     setVideoData,
                     handleVideoInputChange,
                     handleVideoFileChange,
-                    handleVideoSubmit
+                    handleVideoSubmit,
+                    isUploading,
+                    progress,
+                    uploadPhase
                   )}
               </div>
             )}
@@ -770,7 +801,10 @@ const renderVideoForm = (
   setVideoData,
   handleVideoInputChange,
   handleVideoFileChange,
-  handleVideoSubmit
+  handleVideoSubmit,
+  isUploading,
+  progress,
+  uploadPhase
 ) => (
   <div className="form-container mt-3">
     {/* Dropdown per le sezioni */}
@@ -850,9 +884,18 @@ const renderVideoForm = (
             <Form.Control type="file" onChange={handleVideoFileChange} />
           </Form.Group>
 
-          <Button type="submit" className="button-admin">
-            Invia Video
+          {/* Pulsante di invio bloccato durante l'upload */}
+          <Button type="submit" className="button-admin" disabled={isUploading}>
+            {isUploading ? "Caricamento..." : "Invia Video"}
           </Button>
+
+          {/* Barra di avanzamento durante il caricamento */}
+          {isUploading && (
+            <div className="mt-3">
+              <p>{uploadPhase}</p>
+              <ProgressBar now={progress} label={`${progress}%`} />
+            </div>
+          )}
         </Form>
       </div>
     )}
