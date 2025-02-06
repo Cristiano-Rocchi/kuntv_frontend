@@ -5,7 +5,7 @@ import MyNavbar from "./Components/Navbar/MyNavbar";
 import Home from "./Components/Home/Home";
 import TvSeries from "./Components/TvSeries/TvSeries";
 import Admin from "./Components/Admin/Admin";
-import Edit from "./Components/Edit/Edit";
+import EditVideo from "./Components/EditVideo/EditVideo";
 
 const App = () => {
   const location = useLocation();
@@ -19,7 +19,7 @@ const App = () => {
         <Route path="/home" element={<Home />} />
         <Route path="/tvseries" element={<TvSeries />} />
         <Route path="/admin" element={<Admin />} />
-        <Route path="/edit" element={<Edit />} />
+        <Route path="/editvideo" element={<EditVideo />} />
       </Routes>
     </>
   );
