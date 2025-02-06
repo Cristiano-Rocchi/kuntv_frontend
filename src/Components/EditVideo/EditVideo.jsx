@@ -1,16 +1,75 @@
 import "../../App.scss";
 import React, { useState, useEffect } from "react";
-import { Table, Spinner, Alert, Container, Button } from "react-bootstrap";
+import {
+  Tab,
+  Nav,
+  Table,
+  Spinner,
+  Alert,
+  Container,
+  Button,
+} from "react-bootstrap";
 
 const EditVideo = () => {
+  const [sezioni, setSezioni] = useState([]);
+  const [stagioni, setStagioni] = useState([]);
   const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState({
+    sezioni: true,
+    stagioni: true,
+    videos: true,
+  });
+  const [error, setError] = useState({
+    sezioni: null,
+    stagioni: null,
+    videos: null,
+  });
 
   useEffect(() => {
+    fetchSezioni();
+    fetchStagioni();
     fetchVideos();
   }, []);
 
+  // Fetch Sezioni
+  const fetchSezioni = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/api/sezioni", {
+        headers: {
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Errore nel recupero delle sezioni");
+
+      setSezioni(await response.json());
+    } catch (error) {
+      setError((prev) => ({ ...prev, sezioni: error.message }));
+    } finally {
+      setLoading((prev) => ({ ...prev, sezioni: false }));
+    }
+  };
+
+  // Fetch Stagioni
+  const fetchStagioni = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/api/stagioni", {
+        headers: {
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Errore nel recupero delle stagioni");
+
+      setStagioni(await response.json());
+    } catch (error) {
+      setError((prev) => ({ ...prev, stagioni: error.message }));
+    } finally {
+      setLoading((prev) => ({ ...prev, stagioni: false }));
+    }
+  };
+
+  // Fetch Video
   const fetchVideos = async () => {
     try {
       const response = await fetch("http://localhost:3001/api/video", {
@@ -19,35 +78,25 @@ const EditVideo = () => {
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setVideos(data);
-      } else {
-        throw new Error("Errore nel recupero dei video");
-      }
+      if (!response.ok) throw new Error("Errore nel recupero dei video");
+
+      setVideos(await response.json());
     } catch (error) {
-      setError(error.message);
+      setError((prev) => ({ ...prev, videos: error.message }));
     } finally {
-      setLoading(false);
+      setLoading((prev) => ({ ...prev, videos: false }));
     }
   };
 
-  // Funzione per copiare il link negli appunti
-  const copyToClipboard = (link) => {
-    navigator.clipboard.writeText(link);
-    alert("🔗 Link copiato negli appunti!");
-  };
-
-  // Funzione per eliminare un video
-  const handleDelete = async (id) => {
+  // Funzione per eliminare un elemento (Sezione, Stagione, Video)
+  const handleDelete = async (id, type, fetchFunction) => {
     const confirmDelete = window.confirm(
-      "⚠️ Are you sure you want to delete this video?"
+      `⚠️ Are you sure you want to delete this ${type}?`
     );
-
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`http://localhost:3001/api/video/${id}`, {
+      const response = await fetch(`http://localhost:3001/api/${type}/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
@@ -55,80 +104,193 @@ const EditVideo = () => {
       });
 
       if (response.ok) {
-        alert("✅ Video deleted successfully!");
-        setVideos(videos.filter((video) => video.id !== id));
+        alert(`✅ ${type} deleted successfully!`);
+        fetchFunction(); // Ricarica i dati dopo la cancellazione
       } else {
-        alert("❌ Error deleting video!");
+        alert(`❌ Error deleting ${type}!`);
       }
     } catch (error) {
-      alert("❌ Error deleting video: " + error.message);
+      alert(`❌ Error deleting ${type}: ` + error.message);
     }
   };
 
   return (
     <Container className="mt-4">
-      <h2 className="text-center">🎬 Lista Video</h2>
-      {loading && <Spinner animation="border" className="d-block mx-auto" />}
-      {error && <Alert variant="danger">❌ {error}</Alert>}
+      <h2 className="text-center">⚙️ Admin Dashboard</h2>
 
-      {!loading && !error && (
-        <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              <th>UUID</th>
-              <th>Titolo</th>
-              <th>Durata</th>
-              <th>Stagione</th>
-              <th>Sezione</th>
-              <th>Bucket</th>
-              <th>Link</th>
-              <th>Opzioni</th>
-            </tr>
-          </thead>
-          <tbody>
-            {videos.map((video) => (
-              <tr key={video.id}>
-                <td>{video.id}</td>
-                <td>{video.titolo}</td>
-                <td>{video.durata}</td>
-                <td>{video.stagioneTitolo || "N/A"}</td>
-                <td>{video.sezioneTitolo}</td>
-                <td>{video.fileLink.split(".")[0].replace("https://", "")}</td>
-                <td>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => copyToClipboard(video.fileLink)}
-                  >
-                    📋 Copia
-                  </Button>{" "}
-                  <Button
-                    variant="success"
-                    size="sm"
-                    href={video.fileLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    🔗 Apri
-                  </Button>
-                </td>
-                <td>
-                  <Button variant="warning" size="sm" disabled>
-                    ✏️ Edit
-                  </Button>{" "}
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(video.id)}
-                  >
-                    🗑️ Delete
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      )}
+      <Tab.Container defaultActiveKey="sezioni">
+        <Nav variant="tabs" className="mb-3">
+          <Nav.Item>
+            <Nav.Link eventKey="sezioni">📂 Sezioni</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="stagioni">📺 Stagioni</Nav.Link>
+          </Nav.Item>
+          <Nav.Item>
+            <Nav.Link eventKey="videos">🎬 Video</Nav.Link>
+          </Nav.Item>
+        </Nav>
+
+        <Tab.Content>
+          {/* Sezioni */}
+          <Tab.Pane eventKey="sezioni">
+            {loading.sezioni && <Spinner animation="border" />}
+            {error.sezioni && (
+              <Alert variant="danger">❌ {error.sezioni}</Alert>
+            )}
+            {!loading.sezioni && !error.sezioni && (
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>UUID</th>
+                    <th>Titolo</th>
+                    <th>Tag</th>
+                    <th>Anno</th>
+                    <th>Opzioni</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sezioni.map((sezione) => (
+                    <tr key={sezione.id}>
+                      <td>{sezione.id}</td>
+                      <td>{sezione.titolo}</td>
+                      <td>{sezione.tag.join(", ")}</td>
+                      <td>{sezione.anno}</td>
+                      <td>
+                        <Button variant="warning" size="sm" disabled>
+                          ✏️ Edit
+                        </Button>{" "}
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() =>
+                            handleDelete(sezione.id, "sezioni", fetchSezioni)
+                          }
+                        >
+                          🗑️ Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+          </Tab.Pane>
+
+          {/* Stagioni */}
+          <Tab.Pane eventKey="stagioni">
+            {loading.stagioni && <Spinner animation="border" />}
+            {error.stagioni && (
+              <Alert variant="danger">❌ {error.stagioni}</Alert>
+            )}
+            {!loading.stagioni && !error.stagioni && (
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>UUID</th>
+                    <th>Titolo</th>
+                    <th>Anno</th>
+                    <th>Sezione</th>
+                    <th>Opzioni</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stagioni.map((stagione) => (
+                    <tr key={stagione.id}>
+                      <td>{stagione.id}</td>
+                      <td>{stagione.titolo}</td>
+                      <td>{stagione.anno}</td>
+                      <td>{stagione.sezioneTitolo}</td>
+                      <td>
+                        <Button variant="warning" size="sm" disabled>
+                          ✏️ Edit
+                        </Button>{" "}
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() =>
+                            handleDelete(stagione.id, "stagioni", fetchStagioni)
+                          }
+                        >
+                          🗑️ Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+          </Tab.Pane>
+
+          {/* Video */}
+          {/* Video */}
+          <Tab.Pane eventKey="videos">
+            {loading.videos && <Spinner animation="border" />}
+            {error.videos && <Alert variant="danger">❌ {error.videos}</Alert>}
+            {!loading.videos && !error.videos && (
+              <Table striped bordered hover>
+                <thead>
+                  <tr>
+                    <th>UUID</th>
+                    <th>Titolo</th>
+                    <th>Durata</th>
+                    <th>Stagione</th>
+                    <th>Sezione</th>
+                    <th>Bucket</th>
+                    <th>Link</th>
+                    <th>Opzioni</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {videos.map((video) => (
+                    <tr key={video.id}>
+                      <td>{video.id}</td>
+                      <td>{video.titolo}</td>
+                      <td>{video.durata}</td>
+                      <td>{video.stagioneTitolo || "N/A"}</td>
+                      <td>{video.sezioneTitolo}</td>
+                      <td>
+                        {video.fileLink.split(".")[0].replace("https://", "")}
+                      </td>
+                      <td>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() =>
+                            navigator.clipboard.writeText(video.fileLink)
+                          }
+                        >
+                          📋 Copia
+                        </Button>{" "}
+                        <Button
+                          variant="success"
+                          size="sm"
+                          href={video.fileLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          🔗 Apri
+                        </Button>
+                      </td>
+                      <td>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() =>
+                            handleDelete(video.id, "video", fetchVideos)
+                          }
+                        >
+                          🗑️ Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+          </Tab.Pane>
+        </Tab.Content>
+      </Tab.Container>
     </Container>
   );
 };
