@@ -1,5 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { Button, Col, Container, Row, Form } from "react-bootstrap";
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios"; // Assicurati di avere axios installato
+import {
+  Button,
+  Col,
+  Container,
+  Row,
+  Form,
+  ProgressBar,
+} from "react-bootstrap";
 import "./Admin.scss";
 
 const Admin = () => {
@@ -45,6 +53,11 @@ const Admin = () => {
   const [stagioni, setStagioni] = useState([]);
   const [tagOptions, setTagOptions] = useState([]);
   const [showTagList, setShowTagList] = useState(false);
+  const [isUploading, setIsUploading] = useState(false); // Stato per indicare l'upload in corso
+  const [progress, setProgress] = useState(0); // Stato per il progresso dell'upload
+  const [uploadPhase, setUploadPhase] = useState(""); // Stato per la fase dell'upload
+  const [uploadComplete, setUploadComplete] = useState(false); // Stato per il messaggio di successo
+  const cancelTokenSource = useRef(null); // Token per annullare l'upload
 
   // -------------------FUNZIONI DI VISUALIZZAZIONE-------------------
   // Funzione per mostrare/nascondere il form per aggiungere un FILM
@@ -330,6 +343,7 @@ const Admin = () => {
   };
 
   // Funzione per la creazione di un nuovo VIDEO
+
   const handleVideoSubmit = async (e) => {
     e.preventDefault();
 
@@ -345,11 +359,12 @@ const Admin = () => {
 
     setProgress(0);
     setIsUploading(true);
-
-    // Simula la compressione (dal 0% al 50%)
     setUploadPhase("Compressione in corso...");
+    setUploadComplete(false); // Nasconde il messaggio di successo
+
+    // Simula la compressione (0% -> 50%)
     for (let i = 0; i <= 50; i += 10) {
-      await new Promise((resolve) => setTimeout(resolve, 300)); // Simula la compressione
+      await new Promise((resolve) => setTimeout(resolve, 500));
       setProgress(i);
     }
 
@@ -362,43 +377,49 @@ const Admin = () => {
     try {
       setUploadPhase("Caricamento in corso...");
 
-      const response = await fetch("http://localhost:3001/api/video/upload", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
-        },
-        body: formData,
-      });
+      // Crea un nuovo token per annullare la richiesta
+      cancelTokenSource.current = axios.CancelToken.source();
 
-      if (response.ok) {
-        const createdVideo = await response.json();
-        console.log("Video creato con successo:", createdVideo);
-
-        // Simula il progresso dell'upload (dal 50% al 100%)
-        for (let i = 50; i <= 100; i += 10) {
-          await new Promise((resolve) => setTimeout(resolve, 300)); // Simula il caricamento
-          setProgress(i);
+      const response = await axios.post(
+        "http://localhost:3001/api/video/upload",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 50) / progressEvent.total + 50
+            );
+            setProgress(percentCompleted);
+          },
+          cancelToken: cancelTokenSource.current.token, // Assegna il token per poterlo annullare
         }
+      );
 
-        setUploadPhase("Caricamento completato!");
+      if (response.status === 200) {
+        setUploadPhase("✅ Caricamento completato con successo!");
+        setUploadComplete(true);
+
+        // Dopo il caricamento, resetta il form
         setTimeout(() => {
           setIsUploading(false);
           setProgress(0);
+          setVideoData({ titolo: "", durata: "", file: null, stagioneId: "" });
         }, 2000);
-
-        // Resetta i dati del form video
-        setVideoData({ titolo: "", durata: "", file: null, stagioneId: "" });
       } else {
-        console.error(
-          "Errore durante la creazione del video:",
-          await response.text()
-        );
-        setUploadPhase("Errore nel caricamento!");
+        console.error("Errore durante la creazione del video:", response.data);
+        setUploadPhase("❌ Errore nel caricamento!");
         setIsUploading(false);
       }
     } catch (error) {
-      console.error("Errore nella richiesta:", error.message);
-      setUploadPhase("Errore nella richiesta!");
+      if (axios.isCancel(error)) {
+        setUploadPhase("⛔ Upload annullato!");
+      } else {
+        console.error("Errore nella richiesta:", error.message);
+        setUploadPhase("❌ Errore nella richiesta!");
+      }
       setIsUploading(false);
     }
   };
@@ -561,7 +582,9 @@ const Admin = () => {
                     handleVideoSubmit,
                     isUploading,
                     progress,
-                    uploadPhase
+                    uploadPhase,
+                    uploadComplete,
+                    cancelTokenSource
                   )}
               </div>
             )}
@@ -804,7 +827,9 @@ const renderVideoForm = (
   handleVideoSubmit,
   isUploading,
   progress,
-  uploadPhase
+  uploadPhase,
+  uploadComplete,
+  cancelTokenSource
 ) => (
   <div className="form-container mt-3">
     {/* Dropdown per le sezioni */}
@@ -817,9 +842,9 @@ const renderVideoForm = (
           const sezioneId = e.target.value;
           setSelectedSezioneId(sezioneId);
           if (sezioneId) {
-            fetchStagioni(sezioneId); // Carica le stagioni
+            fetchStagioni(sezioneId);
           } else {
-            setStagioni([]); // Resetta le stagioni
+            setStagioni([]);
           }
         }}
       >
@@ -889,11 +914,32 @@ const renderVideoForm = (
             {isUploading ? "Caricamento..." : "Invia Video"}
           </Button>
 
+          {/* Pulsante Stop per annullare l'upload */}
+          {isUploading && (
+            <Button
+              variant="danger"
+              className="ml-2"
+              onClick={() => {
+                if (cancelTokenSource.current)
+                  cancelTokenSource.current.cancel();
+              }}
+            >
+              Stop
+            </Button>
+          )}
+
           {/* Barra di avanzamento durante il caricamento */}
           {isUploading && (
             <div className="mt-3">
               <p>{uploadPhase}</p>
               <ProgressBar now={progress} label={`${progress}%`} />
+            </div>
+          )}
+
+          {/* Messaggio di successo dopo il caricamento */}
+          {uploadComplete && (
+            <div className="mt-3 text-success">
+              ✅ Caricamento completato con successo!
             </div>
           )}
         </Form>
