@@ -360,9 +360,8 @@ const Admin = () => {
     setProgress(0);
     setIsUploading(true);
     setUploadPhase("Compressione in corso...");
-    setUploadComplete(false); // Nasconde il messaggio di successo
+    setUploadComplete(false);
 
-    // Simula la compressione (0% -> 50%)
     for (let i = 0; i <= 50; i += 10) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       setProgress(i);
@@ -376,8 +375,6 @@ const Admin = () => {
 
     try {
       setUploadPhase("Caricamento in corso...");
-
-      // Crea un nuovo token per annullare la richiesta
       cancelTokenSource.current = axios.CancelToken.source();
 
       const response = await axios.post(
@@ -394,19 +391,23 @@ const Admin = () => {
             );
             setProgress(percentCompleted);
           },
-          cancelToken: cancelTokenSource.current.token, // Assegna il token per poterlo annullare
+          cancelToken: cancelTokenSource.current.token,
         }
       );
 
-      if (response.status === 200) {
+      // ✅ Controlliamo sia 200 che 201 come successo
+      if (response.status === 200 || response.status === 201) {
+        console.log("✅ Video caricato con successo:", response.data);
         setUploadPhase("✅ Caricamento completato con successo!");
         setUploadComplete(true);
 
-        // Dopo il caricamento, resetta il form
+        setVideoData({ titolo: "", durata: "", file: null, stagioneId: "" });
+
+        document.getElementById("formFileVideo").value = "";
+
         setTimeout(() => {
           setIsUploading(false);
           setProgress(0);
-          setVideoData({ titolo: "", durata: "", file: null, stagioneId: "" });
         }, 2000);
       } else {
         console.error("Errore durante la creazione del video:", response.data);
