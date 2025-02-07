@@ -26,6 +26,7 @@ const EditVideo = () => {
     videos: null,
   });
 
+  // sorted video
   const [sortConfig, setSortConfig] = useState({
     key: "dataCaricamento",
     direction: "desc",
@@ -74,6 +75,13 @@ const EditVideo = () => {
     fetchVideos();
   }, []);
 
+  const [search, setSearch] = useState({
+    titolo: "",
+    sezione: "",
+    stagione: "",
+    bucket: "",
+  });
+
   //-------------FETCH-----------------
   // Fetch Sezioni
   const fetchSezioni = async () => {
@@ -116,11 +124,20 @@ const EditVideo = () => {
   // Fetch Video
   const fetchVideos = async () => {
     try {
-      const response = await fetch("http://localhost:3001/api/video", {
-        headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
-        },
-      });
+      const queryParams = new URLSearchParams();
+      if (search.titolo) queryParams.append("titolo", search.titolo);
+      if (search.sezione) queryParams.append("sezione", search.sezione);
+      if (search.stagione) queryParams.append("stagione", search.stagione);
+      if (search.bucket) queryParams.append("bucket", search.bucket);
+
+      const response = await fetch(
+        `http://localhost:3001/api/video?${queryParams.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+          },
+        }
+      );
 
       if (!response.ok) throw new Error("Errore nel recupero dei video");
 
@@ -266,9 +283,69 @@ const EditVideo = () => {
             )}
           </Tab.Pane>
 
+          {/* Video */}
           <Tab.Pane eventKey="videos">
             {loading.videos && <Spinner animation="border" />}
             {error.videos && <Alert variant="danger">❌ {error.videos}</Alert>}
+
+            {/* Barra di ricerca */}
+            <div className="d-flex flex-wrap mb-3">
+              <input
+                type="text"
+                placeholder="Cerca per titolo..."
+                className="form-control me-2"
+                value={search.titolo}
+                onChange={(e) =>
+                  setSearch({ ...search, titolo: e.target.value })
+                }
+              />
+              <input
+                type="text"
+                placeholder="Cerca per sezione..."
+                className="form-control me-2"
+                value={search.sezione}
+                onChange={(e) =>
+                  setSearch({ ...search, sezione: e.target.value })
+                }
+              />
+              <input
+                type="text"
+                placeholder="Cerca per stagione..."
+                className="form-control me-2"
+                value={search.stagione}
+                onChange={(e) =>
+                  setSearch({ ...search, stagione: e.target.value })
+                }
+              />
+              <input
+                type="text"
+                placeholder="Cerca per bucket..."
+                className="form-control"
+                value={search.bucket}
+                onChange={(e) =>
+                  setSearch({ ...search, bucket: e.target.value })
+                }
+              />
+              <Button variant="primary" onClick={fetchVideos} className="ms-2">
+                🔎 Cerca
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setSearch({
+                    titolo: "",
+                    sezione: "",
+                    stagione: "",
+                    bucket: "",
+                  });
+                  fetchVideos();
+                }}
+                className="ms-2"
+              >
+                ❌ Reset
+              </Button>
+            </div>
+
             {!loading.videos && !error.videos && (
               <Table striped bordered hover>
                 <thead>
