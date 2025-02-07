@@ -8,6 +8,7 @@ import {
   Alert,
   Container,
   Button,
+  Form,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
@@ -16,6 +17,9 @@ const EditVideo = () => {
   const [sezioni, setSezioni] = useState([]);
   const [stagioni, setStagioni] = useState([]);
   const [videos, setVideos] = useState([]);
+  const [tagOptions, setTagOptions] = useState([]); // Lista dei tag presi dal backend
+  const [showTagList, setShowTagList] = useState(false); // Controlla la visibilità della lista
+
   const [loading, setLoading] = useState({
     sezioni: true,
     stagioni: true,
@@ -25,6 +29,20 @@ const EditVideo = () => {
     sezioni: null,
     stagioni: null,
     videos: null,
+  });
+
+  // filtro ricerche VIDEO
+  const [search, setSearch] = useState({
+    titolo: "",
+    sezione: "",
+    stagione: "",
+    bucket: "",
+  });
+  // filtro ricerca SEZIONI
+  const [searchSezione, setSearchSezione] = useState({
+    titolo: "",
+    tag: [],
+    anno: "",
   });
 
   // sorted video
@@ -59,6 +77,33 @@ const EditVideo = () => {
     return 0;
   });
 
+  //---------------------FUNZIONI-------------------
+
+  // Funzione per eliminare un elemento (Sezione, Stagione, Video)
+  const handleDelete = async (id, type, fetchFunction) => {
+    const confirmDelete = window.confirm(
+      `⚠️ Are you sure you want to delete this ${type}?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch(`http://localhost:3001/api/${type}/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+        },
+      });
+
+      if (response.ok) {
+        alert(`✅ ${type} deleted successfully!`);
+        fetchFunction(); // Ricarica i dati dopo la cancellazione
+      } else {
+        alert(`❌ Error deleting ${type}!`);
+      }
+    } catch (error) {
+      alert(`❌ Error deleting ${type}: ` + error.message);
+    }
+  };
   // Funzione per aggiornare l'ordinamento quando si clicca su un'intestazione
   const requestSort = (key) => {
     let direction = "asc";
@@ -68,30 +113,46 @@ const EditVideo = () => {
     setSortConfig({ key, direction });
   };
 
+  // funzione per gestire la selezione multipla dei tag
+  const toggleTagSelection = (tag) => {
+    setSearchSezione((prevSearch) => {
+      const isSelected = prevSearch.tag.includes(tag);
+      const updatedTags = isSelected
+        ? prevSearch.tag.filter((t) => t !== tag) // Rimuove il tag se già selezionato
+        : [...prevSearch.tag, tag]; // Aggiunge il tag se non selezionato
+      return { ...prevSearch, tag: updatedTags };
+    });
+  };
+
   //-----------USEEFFECT-------------
 
   useEffect(() => {
     fetchSezioni();
     fetchStagioni();
     fetchVideos();
+    fetchTags();
   }, []);
-
-  const [search, setSearch] = useState({
-    titolo: "",
-    sezione: "",
-    stagione: "",
-    bucket: "",
-  });
 
   //-------------FETCH-----------------
   // Fetch Sezioni
   const fetchSezioni = async () => {
     try {
-      const response = await fetch("http://localhost:3001/api/sezioni", {
-        headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
-        },
-      });
+      const queryParams = new URLSearchParams();
+      if (searchSezione.titolo)
+        queryParams.append("titolo", searchSezione.titolo);
+      if (searchSezione.anno) queryParams.append("anno", searchSezione.anno);
+
+      // Se ci sono più tag selezionati, aggiungili come parametri multipli
+      searchSezione.tag.forEach((tag) => queryParams.append("tag", tag));
+
+      const response = await fetch(
+        `http://localhost:3001/api/sezioni?${queryParams.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+          },
+        }
+      );
 
       if (!response.ok) throw new Error("Errore nel recupero delle sezioni");
 
@@ -150,32 +211,21 @@ const EditVideo = () => {
     }
   };
 
-  // Funzione per eliminare un elemento (Sezione, Stagione, Video)
-  const handleDelete = async (id, type, fetchFunction) => {
-    const confirmDelete = window.confirm(
-      `⚠️ Are you sure you want to delete this ${type}?`
-    );
-    if (!confirmDelete) return;
-
+  // Fetch Tags
+  const fetchTags = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/${type}/${id}`, {
-        method: "DELETE",
+      const response = await fetch("http://localhost:3001/api/sezioni/tags", {
         headers: {
           Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
         },
       });
-
-      if (response.ok) {
-        alert(`✅ ${type} deleted successfully!`);
-        fetchFunction(); // Ricarica i dati dopo la cancellazione
-      } else {
-        alert(`❌ Error deleting ${type}!`);
-      }
+      if (!response.ok) throw new Error("Errore nel recupero dei tags");
+      const tags = await response.json();
+      setTagOptions(tags);
     } catch (error) {
-      alert(`❌ Error deleting ${type}: ` + error.message);
+      console.error("Errore nel caricamento dei tags:", error);
     }
   };
-
   return (
     <>
       <header className="d-flex justify-content-around mt-3">
@@ -205,12 +255,84 @@ const EditVideo = () => {
           </Nav>
 
           <Tab.Content>
-            {/* Sezioni */}
+            {/*-------------- Sezioni-------------- */}
             <Tab.Pane eventKey="sezioni">
               {loading.sezioni && <Spinner animation="border" />}
               {error.sezioni && (
                 <Alert variant="danger">❌ {error.sezioni}</Alert>
               )}
+
+              {/* Barra di ricerca per le sezioni */}
+              <div className="d-flex mb-3">
+                <input
+                  type="text"
+                  placeholder="Cerca per titolo..."
+                  className="form-control me-2"
+                  value={searchSezione.titolo}
+                  onChange={(e) =>
+                    setSearchSezione({
+                      ...searchSezione,
+                      titolo: e.target.value,
+                    })
+                  }
+                />
+                <Form.Group controlId="searchTagSezione">
+                  <Button
+                    onClick={() => setShowTagList(!showTagList)}
+                    className="w-100"
+                  >
+                    {searchSezione.tag.length > 0
+                      ? searchSezione.tag.join(", ")
+                      : "Seleziona i tag"}
+                  </Button>
+
+                  {showTagList && (
+                    <div>
+                      <div className="d-flex">
+                        {tagOptions.map((tag) => (
+                          <div key={tag}>
+                            <Form.Check
+                              type="checkbox"
+                              label={tag}
+                              value={tag}
+                              checked={searchSezione.tag.includes(tag)}
+                              onChange={() => toggleTagSelection(tag)}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </Form.Group>
+
+                <input
+                  type="text"
+                  placeholder="Cerca per anno..."
+                  className="form-control me-2"
+                  value={searchSezione.anno}
+                  onChange={(e) =>
+                    setSearchSezione({ ...searchSezione, anno: e.target.value })
+                  }
+                />
+                <Button
+                  variant="primary"
+                  onClick={fetchSezioni}
+                  className="ms-2"
+                >
+                  🔎 Cerca
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setSearchSezione({ titolo: "", tag: "", anno: "" });
+                    fetchSezioni();
+                  }}
+                  className="ms-2"
+                >
+                  ❌ Reset
+                </Button>
+              </div>
+
               {!loading.sezioni && !error.sezioni && (
                 <Table striped bordered hover>
                   <thead>
