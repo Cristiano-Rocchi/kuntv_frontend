@@ -126,8 +126,17 @@ const EditVideo = () => {
 
   //-----------USEEFFECT-------------
 
+  // Carica sezioni in tempo reale mentre scrivi nella barra di ricerca
   useEffect(() => {
-    fetchSezioni();
+    const delayDebounceFn = setTimeout(() => {
+      fetchSezioni();
+    }, 500); // Ritardo di 500ms per evitare chiamate API eccessive
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchSezione]); // Si attiva solo quando cambia searchSezione
+
+  // Carica stagioni, video e tag SOLO una volta al primo caricamento
+  useEffect(() => {
     fetchStagioni();
     fetchVideos();
     fetchTags();
@@ -142,7 +151,7 @@ const EditVideo = () => {
         queryParams.append("titolo", searchSezione.titolo);
       if (searchSezione.anno) queryParams.append("anno", searchSezione.anno);
 
-      // Se ci sono più tag selezionati, aggiungili come parametri multipli
+      // Invia i tag come parametri multipli
       searchSezione.tag.forEach((tag) => queryParams.append("tag", tag));
 
       const response = await fetch(
@@ -275,6 +284,9 @@ const EditVideo = () => {
                       titolo: e.target.value,
                     })
                   }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") fetchSezioni();
+                  }}
                 />
                 <Form.Group controlId="searchTagSezione">
                   <Button
@@ -287,20 +299,17 @@ const EditVideo = () => {
                   </Button>
 
                   {showTagList && (
-                    <div>
-                      <div className="d-flex">
-                        {tagOptions.map((tag) => (
-                          <div key={tag}>
-                            <Form.Check
-                              type="checkbox"
-                              label={tag}
-                              value={tag}
-                              checked={searchSezione.tag.includes(tag)}
-                              onChange={() => toggleTagSelection(tag)}
-                            />
-                          </div>
-                        ))}
-                      </div>
+                    <div className="border p-2 d-flex">
+                      {tagOptions.map((tag) => (
+                        <Form.Check
+                          key={tag}
+                          type="checkbox"
+                          label={tag}
+                          value={tag}
+                          checked={searchSezione.tag.includes(tag)}
+                          onChange={() => toggleTagSelection(tag)}
+                        />
+                      ))}
                     </div>
                   )}
                 </Form.Group>
@@ -313,7 +322,11 @@ const EditVideo = () => {
                   onChange={(e) =>
                     setSearchSezione({ ...searchSezione, anno: e.target.value })
                   }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") fetchSezioni();
+                  }}
                 />
+
                 <Button
                   variant="primary"
                   onClick={fetchSezioni}
