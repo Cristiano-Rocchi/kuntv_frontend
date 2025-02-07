@@ -13,7 +13,9 @@ const App = () => {
   return (
     <>
       {/* Mostra la navbar solo se non ci troviamo nel percorso "/" */}
-      {location.pathname !== "/" && <MyNavbar />}
+      {location.pathname !== "/" && location.pathname !== "/editvideo" && (
+        <MyNavbar />
+      )}
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/home" element={<Home />} />
