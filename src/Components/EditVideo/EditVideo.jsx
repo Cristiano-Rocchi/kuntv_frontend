@@ -11,6 +11,7 @@ import {
 } from "react-bootstrap";
 
 const EditVideo = () => {
+  //-------------------STATI-------------------
   const [sezioni, setSezioni] = useState([]);
   const [stagioni, setStagioni] = useState([]);
   const [videos, setVideos] = useState([]);
@@ -25,12 +26,55 @@ const EditVideo = () => {
     videos: null,
   });
 
+  const [sortConfig, setSortConfig] = useState({
+    key: "dataCaricamento",
+    direction: "desc",
+  });
+
+  const sortedVideos = [...videos].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+
+    let valueA = a[sortConfig.key];
+    let valueB = b[sortConfig.key];
+
+    // Se stiamo ordinando per data, convertiamo in timestamp
+    if (sortConfig.key === "dataCaricamento") {
+      valueA = new Date(valueA).getTime();
+      valueB = new Date(valueB).getTime();
+    }
+
+    // Ordinamento alfabetico per sezione e stagione
+    if (
+      sortConfig.key === "sezioneTitolo" ||
+      sortConfig.key === "stagioneTitolo"
+    ) {
+      valueA = valueA ? valueA.toLowerCase() : "";
+      valueB = valueB ? valueB.toLowerCase() : "";
+    }
+
+    if (valueA < valueB) return sortConfig.direction === "asc" ? -1 : 1;
+    if (valueA > valueB) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  // Funzione per aggiornare l'ordinamento quando si clicca su un'intestazione
+  const requestSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  //-----------USEEFFECT-------------
+
   useEffect(() => {
     fetchSezioni();
     fetchStagioni();
     fetchVideos();
   }, []);
 
+  //-------------FETCH-----------------
   // Fetch Sezioni
   const fetchSezioni = async () => {
     try {
@@ -222,8 +266,6 @@ const EditVideo = () => {
             )}
           </Tab.Pane>
 
-          {/* Video */}
-          {/* Video */}
           <Tab.Pane eventKey="videos">
             {loading.videos && <Spinner animation="border" />}
             {error.videos && <Alert variant="danger">❌ {error.videos}</Alert>}
@@ -234,15 +276,31 @@ const EditVideo = () => {
                     <th>UUID</th>
                     <th>Titolo</th>
                     <th>Durata</th>
-                    <th>Stagione</th>
-                    <th>Sezione</th>
+                    <th
+                      onClick={() => requestSort("stagioneTitolo")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      Stagione ⬍
+                    </th>
+                    <th
+                      onClick={() => requestSort("sezioneTitolo")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      Sezione ⬍
+                    </th>
                     <th>Bucket</th>
                     <th>Link</th>
+                    <th
+                      onClick={() => requestSort("dataCaricamento")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      Data Caricamento ⬍
+                    </th>
                     <th>Opzioni</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {videos.map((video) => (
+                  {sortedVideos.map((video) => (
                     <tr key={video.id}>
                       <td>{video.id}</td>
                       <td>{video.titolo}</td>
@@ -271,6 +329,9 @@ const EditVideo = () => {
                         >
                           🔗 Apri
                         </Button>
+                      </td>
+                      <td>
+                        {new Date(video.dataCaricamento).toLocaleString()}
                       </td>
                       <td>
                         <Button
