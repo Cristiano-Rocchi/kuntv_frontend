@@ -273,59 +273,68 @@ const EditVideo = () => {
 
               {/* Barra di ricerca per le sezioni */}
               <div className="d-flex mb-3">
-                <input
-                  type="text"
-                  placeholder="Cerca per titolo..."
-                  className="form-control me-2"
-                  value={searchSezione.titolo}
-                  onChange={(e) =>
-                    setSearchSezione({
-                      ...searchSezione,
-                      titolo: e.target.value,
-                    })
-                  }
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") fetchSezioni();
-                  }}
-                />
-                <Form.Group controlId="searchTagSezione">
-                  <Button
-                    onClick={() => setShowTagList(!showTagList)}
-                    className="w-100"
-                  >
-                    {searchSezione.tag.length > 0
-                      ? searchSezione.tag.join(", ")
-                      : "Seleziona i tag"}
-                  </Button>
+                <div className="d-flex">
+                  <div className="me-2">
+                    {" "}
+                    <input
+                      type="text"
+                      placeholder="Cerca per titolo..."
+                      className=" form-control"
+                      value={searchSezione.titolo}
+                      onChange={(e) =>
+                        setSearchSezione({
+                          ...searchSezione,
+                          titolo: e.target.value,
+                        })
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") fetchSezioni();
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Form.Group controlId="searchTagSezione">
+                      <Button onClick={() => setShowTagList(!showTagList)}>
+                        {searchSezione.tag.length > 0
+                          ? searchSezione.tag.join(", ")
+                          : "Seleziona i tag"}
+                      </Button>
 
-                  {showTagList && (
-                    <div className="border p-2 d-flex">
-                      {tagOptions.map((tag) => (
-                        <Form.Check
-                          key={tag}
-                          type="checkbox"
-                          label={tag}
-                          value={tag}
-                          checked={searchSezione.tag.includes(tag)}
-                          onChange={() => toggleTagSelection(tag)}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </Form.Group>
-
-                <input
-                  type="text"
-                  placeholder="Cerca per anno..."
-                  className="form-control me-2"
-                  value={searchSezione.anno}
-                  onChange={(e) =>
-                    setSearchSezione({ ...searchSezione, anno: e.target.value })
-                  }
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") fetchSezioni();
-                  }}
-                />
+                      {showTagList && (
+                        <div className="border p-2 d-flex">
+                          {tagOptions.map((tag) => (
+                            <Form.Check
+                              key={tag}
+                              type="checkbox"
+                              label={tag}
+                              value={tag}
+                              checked={searchSezione.tag.includes(tag)}
+                              onChange={() => toggleTagSelection(tag)}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </Form.Group>
+                  </div>
+                  <div className="me-2">
+                    <input
+                      type="text"
+                      placeholder="Cerca per anno..."
+                      className="form-control"
+                      value={searchSezione.anno}
+                      onChange={(e) =>
+                        setSearchSezione({
+                          ...searchSezione,
+                          anno: e.target.value,
+                        })
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") fetchSezioni();
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="dflex"></div>
 
                 <Button
                   variant="primary"
@@ -337,7 +346,7 @@ const EditVideo = () => {
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    setSearchSezione({ titolo: "", tag: "", anno: "" });
+                    setSearchSezione({ titolo: "", tag: [], anno: "" });
                     fetchSezioni();
                   }}
                   className="ms-2"
