@@ -440,53 +440,90 @@ const Admin = () => {
 
   // Funzione per la creazione di un nuovo VIDEO
 
-  const handleVideoSubmit = async (e, index) => {
+  const handleVideoSubmit = async (e, index = null) => {
     e.preventDefault();
 
-    const video = multiVideoData[index];
+    // Se index è null, significa che stiamo caricando un video singolo
+    const video = index !== null ? multiVideoData[index] : videoData;
 
-    if (!video.titolo || !video.durata || !video.file || !video.stagioneId) {
+    if (
+      !video ||
+      !video.titolo ||
+      !video.durata ||
+      !video.file ||
+      !video.stagioneId
+    ) {
       alert("⚠️ Compila tutti i campi obbligatori.");
       return;
     }
 
-    // Se c'è già un upload in corso, mettiamo il video in coda
-    if (uploadingIndex !== null) {
+    // Se c'è già un upload in corso, mettiamo il video in coda (solo per multi-upload)
+    if (uploadingIndex !== null && index !== null) {
       setUploadQueue((prevQueue) => [...prevQueue, index]);
       return;
     }
 
-    // Se nessun upload è in corso, avvia direttamente l'upload
+    // Avvia l'upload direttamente se non c'è nulla in corso
     startVideoUpload(index);
   };
-  const startVideoUpload = async (index) => {
-    setUploadingIndex(index); // Segniamo questo video come "in upload"
 
-    const video = multiVideoData[index];
+  const startVideoUpload = async (index = null) => {
+    // Se index è null, significa che stiamo caricando un video singolo
+    const video = index !== null ? multiVideoData[index] : videoData;
+
+    if (
+      !video ||
+      !video.titolo ||
+      !video.durata ||
+      !video.file ||
+      !video.stagioneId
+    ) {
+      alert("⚠️ Compila tutti i campi obbligatori.");
+      return;
+    }
+
     const cancelToken = axios.CancelToken.source();
 
-    // Aggiorniamo lo stato solo per il video specifico
-    setMultiVideoData((prevState) => {
-      const newState = [...prevState];
-      newState[index] = {
-        ...newState[index],
+    // 🔹 Gestiamo lo stato diversamente per il singolo video e per il multi-upload
+    if (index !== null) {
+      setMultiVideoData((prevState) => {
+        const newState = [...prevState];
+        newState[index] = {
+          ...newState[index],
+          isUploading: true,
+          progress: 0,
+          uploadPhase: "Compressione in corso...",
+          uploadComplete: false,
+          cancelToken,
+        };
+        return newState;
+      });
+    } else {
+      setVideoData((prevState) => ({
+        ...prevState,
         isUploading: true,
         progress: 0,
         uploadPhase: "Compressione in corso...",
         uploadComplete: false,
-        cancelToken, // Salviamo il token per poterlo usare dopo
-      };
-      return newState;
-    });
+        cancelToken,
+      }));
+    }
 
     // Simuliamo la compressione (0% -> 50%)
     for (let i = 0; i <= 50; i += 10) {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      setMultiVideoData((prevState) => {
-        const newState = [...prevState];
-        newState[index].progress = i;
-        return newState;
-      });
+      if (index !== null) {
+        setMultiVideoData((prevState) => {
+          const newState = [...prevState];
+          newState[index].progress = i;
+          return newState;
+        });
+      } else {
+        setVideoData((prevState) => ({
+          ...prevState,
+          progress: i,
+        }));
+      }
     }
 
     const formData = new FormData();
@@ -496,11 +533,18 @@ const Admin = () => {
     formData.append("stagioneId", video.stagioneId);
 
     try {
-      setMultiVideoData((prevState) => {
-        const newState = [...prevState];
-        newState[index].uploadPhase = "Caricamento in corso...";
-        return newState;
-      });
+      if (index !== null) {
+        setMultiVideoData((prevState) => {
+          const newState = [...prevState];
+          newState[index].uploadPhase = "Caricamento in corso...";
+          return newState;
+        });
+      } else {
+        setVideoData((prevState) => ({
+          ...prevState,
+          uploadPhase: "Caricamento in corso...",
+        }));
+      }
 
       const response = await axios.post(
         "http://localhost:3001/api/video/upload",
@@ -514,21 +558,45 @@ const Admin = () => {
             const percentCompleted = Math.round(
               (progressEvent.loaded * 50) / progressEvent.total + 50
             );
-            setMultiVideoData((prevState) => {
-              const newState = [...prevState];
-              newState[index].progress = percentCompleted;
-              return newState;
-            });
+            if (index !== null) {
+              setMultiVideoData((prevState) => {
+                const newState = [...prevState];
+                newState[index].progress = percentCompleted;
+                return newState;
+              });
+            } else {
+              setVideoData((prevState) => ({
+                ...prevState,
+                progress: percentCompleted,
+              }));
+            }
           },
-          cancelToken: cancelToken.token, // Usa il token per annullare
+          cancelToken: cancelToken.token,
         }
       );
 
       if (response.status === 200 || response.status === 201) {
         console.log("✅ Video caricato con successo:", response.data);
-        setMultiVideoData((prevState) => {
-          const newState = [...prevState];
-          newState[index] = {
+        if (index !== null) {
+          setMultiVideoData((prevState) => {
+            const newState = [...prevState];
+            newState[index] = {
+              titolo: "",
+              durata: "",
+              file: null,
+              stagioneId: "",
+              isUploading: false,
+              progress: 100,
+              uploadPhase: "✅ Caricamento completato!",
+              uploadComplete: true,
+              cancelToken: null,
+            };
+            return newState;
+          });
+
+          processNextUpload(); // Passa al prossimo nella coda solo per il multi-upload
+        } else {
+          setVideoData({
             titolo: "",
             durata: "",
             file: null,
@@ -538,12 +606,8 @@ const Admin = () => {
             uploadPhase: "✅ Caricamento completato!",
             uploadComplete: true,
             cancelToken: null,
-          };
-          return newState;
-        });
-
-        // Passiamo al prossimo video nella coda
-        processNextUpload();
+          });
+        }
       } else {
         throw new Error("Errore durante il caricamento!");
       }
@@ -554,14 +618,20 @@ const Admin = () => {
         console.error("Errore nella richiesta:", error.message);
         alert(`❌ Errore: ${error.message}`);
       }
-      setMultiVideoData((prevState) => {
-        const newState = [...prevState];
-        newState[index].isUploading = false;
-        return newState;
-      });
 
-      // Passiamo al prossimo video nella coda anche se c'è stato un errore
-      processNextUpload();
+      if (index !== null) {
+        setMultiVideoData((prevState) => {
+          const newState = [...prevState];
+          newState[index].isUploading = false;
+          return newState;
+        });
+        processNextUpload();
+      } else {
+        setVideoData((prevState) => ({
+          ...prevState,
+          isUploading: false,
+        }));
+      }
     }
   };
 
@@ -772,7 +842,11 @@ const Admin = () => {
                     progress,
                     uploadPhase,
                     uploadComplete,
-                    cancelTokenSource
+                    cancelTokenSource,
+                    uploadQueue || [],
+                    uploadingIndex || null,
+                    0,
+                    handleRemoveFromQueue || (() => {})
                   )}
               </div>
             )}
