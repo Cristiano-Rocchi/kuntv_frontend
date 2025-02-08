@@ -63,6 +63,15 @@ const Admin = () => {
   const [showVideoOptions, setShowVideoOptions] = useState(false); // Stato per mostrare/nascondere bottoni per le opzioni di video
   const [showMultiVideoModal, setShowMultiVideoModal] = useState(false);
 
+  const [multiVideoData, setMultiVideoData] = useState(
+    Array(10).fill({
+      titolo: "",
+      durata: "",
+      file: null,
+      stagioneId: "",
+    })
+  );
+
   // -------------------FUNZIONI DI VISUALIZZAZIONE-------------------
   // Funzione per mostrare/nascondere il form per aggiungere un FILM
   const toggleFilmForm = () => {
@@ -735,24 +744,35 @@ const Admin = () => {
               ✖
             </button>
 
-            {renderVideoForm(
-              sezioni,
-              selectedSezioneId,
-              setSelectedSezioneId,
-              stagioni,
-              fetchStagioni,
-              setStagioni,
-              videoData,
-              setVideoData,
-              handleVideoInputChange,
-              handleVideoFileChange,
-              handleVideoSubmit,
-              isUploading,
-              progress,
-              uploadPhase,
-              uploadComplete,
-              cancelTokenSource
-            )}
+            <div className="multi-video-grid">
+              {multiVideoData.map((video, index) => (
+                <div key={index} className="video-modal">
+                  <h3>Video {index + 1}</h3>
+                  {renderVideoForm(
+                    sezioni,
+                    selectedSezioneId,
+                    setSelectedSezioneId,
+                    stagioni,
+                    fetchStagioni,
+                    setStagioni,
+                    video,
+                    (newVideo) => {
+                      const newMultiVideoData = [...multiVideoData];
+                      newMultiVideoData[index] = newVideo;
+                      setMultiVideoData(newMultiVideoData);
+                    },
+                    handleVideoInputChange,
+                    handleVideoFileChange,
+                    handleVideoSubmit,
+                    isUploading,
+                    progress,
+                    uploadPhase,
+                    uploadComplete,
+                    cancelTokenSource
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -1113,7 +1133,9 @@ const renderVideoForm = (
               placeholder="Inserisci il titolo"
               name="titolo"
               value={videoData.titolo}
-              onChange={handleVideoInputChange}
+              onChange={(e) =>
+                setVideoData({ ...videoData, titolo: e.target.value })
+              }
             />
           </Form.Group>
 
@@ -1124,13 +1146,20 @@ const renderVideoForm = (
               placeholder="Inserisci la durata"
               name="durata"
               value={videoData.durata}
-              onChange={handleVideoInputChange}
+              onChange={(e) =>
+                setVideoData({ ...videoData, durata: e.target.value })
+              }
             />
           </Form.Group>
 
           <Form.Group controlId="formFileVideo" className="mb-3">
             <Form.Label>File</Form.Label>
-            <Form.Control type="file" onChange={handleVideoFileChange} />
+            <Form.Control
+              type="file"
+              onChange={(e) =>
+                setVideoData({ ...videoData, file: e.target.files[0] })
+              }
+            />
           </Form.Group>
 
           {/* Pulsante di invio bloccato durante l'upload */}
