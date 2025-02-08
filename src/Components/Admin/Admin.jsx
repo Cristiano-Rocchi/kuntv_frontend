@@ -60,6 +60,8 @@ const Admin = () => {
   const [uploadComplete, setUploadComplete] = useState(false); // Stato per il messaggio di successo
   const [uploadError, setUploadError] = useState(null); // Stato per il messaggio di errore
   const cancelTokenSource = useRef(null); // Token per annullare l'upload
+  const [showVideoOptions, setShowVideoOptions] = useState(false); // Stato per mostrare/nascondere bottoni per le opzioni di video
+  const [showMultiVideoModal, setShowMultiVideoModal] = useState(false);
 
   // -------------------FUNZIONI DI VISUALIZZAZIONE-------------------
   // Funzione per mostrare/nascondere il form per aggiungere un FILM
@@ -94,7 +96,7 @@ const Admin = () => {
 
   // Funzione per mostrare/nascondere il form per aggiungere un VIDEO
   const toggleVideoForm = () => {
-    setShowVideoForm(!showVideoForm);
+    setShowVideoOptions(!showVideoOptions); // Mostra/Nasconde le opzioni
     setShowSezioneForm(false);
     setShowStagioneForm(false);
   };
@@ -629,6 +631,22 @@ const Admin = () => {
                   <Button className="button-tvseries" onClick={toggleVideoForm}>
                     Aggiungi Video
                   </Button>
+                  {showVideoOptions && (
+                    <div className="mt-3">
+                      <Button
+                        className="button-tvseries"
+                        onClick={() => setShowVideoForm(true)}
+                      >
+                        Video Singolo
+                      </Button>
+                      <Button
+                        className="button-tvseries"
+                        onClick={() => setShowMultiVideoModal(true)}
+                      >
+                        Fino a 10
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 {/* Form per aggiungere una sezione */}
                 {showSezioneForm &&
@@ -663,6 +681,7 @@ const Admin = () => {
                   )}
                 {/* Form per aggiungere un video */}
                 {showVideoForm &&
+                  showVideoOptions &&
                   renderVideoForm(
                     sezioni,
                     selectedSezioneId,
@@ -700,6 +719,43 @@ const Admin = () => {
           </Col>
         </Row>
       </Container>
+      {showMultiVideoModal && (
+        <div
+          className="multi-video-overlay"
+          onClick={() => setShowMultiVideoModal(false)}
+        >
+          <div
+            className="multi-video-modal"
+            onClick={(e) => e.stopPropagation()} // Evita la chiusura quando clicchiamo dentro
+          >
+            <button
+              className="close-modal-btn"
+              onClick={() => setShowMultiVideoModal(false)}
+            >
+              ✖
+            </button>
+
+            {renderVideoForm(
+              sezioni,
+              selectedSezioneId,
+              setSelectedSezioneId,
+              stagioni,
+              fetchStagioni,
+              setStagioni,
+              videoData,
+              setVideoData,
+              handleVideoInputChange,
+              handleVideoFileChange,
+              handleVideoSubmit,
+              isUploading,
+              progress,
+              uploadPhase,
+              uploadComplete,
+              cancelTokenSource
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
