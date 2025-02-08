@@ -9,6 +9,7 @@ import {
   ProgressBar,
 } from "react-bootstrap";
 import "./Admin.scss";
+import { Link } from "react-router-dom";
 
 const Admin = () => {
   // -------------------STATI-------------------
@@ -57,6 +58,7 @@ const Admin = () => {
   const [progress, setProgress] = useState(0); // Stato per il progresso dell'upload
   const [uploadPhase, setUploadPhase] = useState(""); // Stato per la fase dell'upload
   const [uploadComplete, setUploadComplete] = useState(false); // Stato per il messaggio di successo
+  const [uploadError, setUploadError] = useState(null); // Stato per il messaggio di errore
   const cancelTokenSource = useRef(null); // Token per annullare l'upload
 
   // -------------------FUNZIONI DI VISUALIZZAZIONE-------------------
@@ -283,39 +285,57 @@ const Admin = () => {
       !sezioneData.anno ||
       !sezioneData.file
     ) {
-      alert("Compila tutti i campi obbligatori.");
+      alert("⚠️ Compila tutti i campi obbligatori.");
       return;
     }
+
+    // Reset dello stato di upload
+    setIsUploading(true);
+    setProgress(0);
+    setUploadComplete(false);
+    setUploadError(null);
 
     const formData = new FormData();
     formData.append("titolo", sezioneData.titolo);
     formData.append("tag", sezioneData.tag.join(","));
-
     formData.append("anno", sezioneData.anno);
     formData.append("file", sezioneData.file);
 
-    // 🔥 Aggiungi log per vedere cosa viene effettivamente inviato
+    // Debugging: Log del FormData
+    console.log("📦 Payload inviato:");
     for (let pair of formData.entries()) {
       console.log(pair[0], pair[1]);
     }
 
     try {
-      const response = await fetch("http://localhost:3001/api/sezioni", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
-        },
-        body: formData,
-      });
+      const response = await axios.post(
+        "http://localhost:3001/api/sezioni",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setProgress(percentCompleted);
+          },
+        }
+      );
 
-      if (response.ok) {
-        console.log("Sezione creata con successo!");
-        setSezioneData({ titolo: "", tag: [], anno: "", file: null }); // Reset form
+      if (response.status === 200 || response.status === 201) {
+        setUploadComplete(true);
+        setIsUploading(false);
+        alert("✅ Sezione creata con successo!");
+        setSezioneData({ titolo: "", tag: [], anno: "", file: null });
       } else {
-        console.error("Errore durante la creazione:", await response.text());
+        throw new Error("Errore nella creazione della sezione");
       }
     } catch (error) {
-      console.error("Errore nella richiesta:", error.message);
+      setUploadError(error.message);
+      setIsUploading(false);
     }
   };
 
@@ -324,21 +344,26 @@ const Admin = () => {
 
     // Validazione dei campi obbligatori
     if (!stagioneData.titolo || !stagioneData.anno || !selectedSezioneId) {
-      alert("Compila tutti i campi obbligatori.");
+      alert("⚠️ Compila tutti i campi obbligatori.");
       return;
     }
 
-    // Creazione del FormData
+    // Reset dello stato di upload
+    setIsUploading(true);
+    setProgress(0);
+    setUploadComplete(false);
+    setUploadError(null);
+
     const formData = new FormData();
     formData.append("titolo", stagioneData.titolo);
     formData.append("anno", stagioneData.anno);
     formData.append("sezioneId", selectedSezioneId);
 
     if (stagioneData.file) {
-      formData.append("immagine", stagioneData.file); // 🔥 Cambiato da "file" a "immagine"
+      formData.append("immagine", stagioneData.file);
     }
 
-    // 🔥 Debugging: Log del FormData
+    // Debugging: Log del FormData
     console.log("📦 Payload inviato:");
     for (let pair of formData.entries()) {
       if (pair[1] instanceof File) {
@@ -356,32 +381,35 @@ const Admin = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3001/api/stagioni", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`, // Token corretto
-        },
-        body: formData,
-      });
+      const response = await axios.post(
+        "http://localhost:3001/api/stagioni",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setProgress(percentCompleted);
+          },
+        }
+      );
 
-      if (response.ok) {
-        const createdStagione = await response.json();
-        console.log("✅ Stagione creata con successo:", createdStagione);
-
-        // Reset dello stato
+      if (response.status === 200 || response.status === 201) {
+        setUploadComplete(true);
+        setIsUploading(false);
+        alert("✅ Stagione creata con successo!");
         setStagioneData({ titolo: "", anno: "", sezioneId: "", file: null });
-        setSelectedSezioneId(""); // Reset della selezione
+        setSelectedSezioneId("");
       } else {
-        const errorMessage = await response.text();
-        console.error(
-          "❌ Errore durante la creazione della stagione:",
-          errorMessage
-        );
-        alert("Errore durante la creazione della stagione: " + errorMessage);
+        throw new Error("Errore nella creazione della stagione");
       }
     } catch (error) {
-      console.error("❌ Errore nella richiesta:", error.message);
-      alert("Si è verificato un errore nella richiesta: " + error.message);
+      setUploadError(error.message);
+      setIsUploading(false);
     }
   };
 
@@ -612,7 +640,11 @@ const Admin = () => {
                     tagOptions,
                     handleSezioneTagChange,
                     showTagList,
-                    setShowTagList
+                    setShowTagList,
+                    isUploading,
+                    progress,
+                    uploadComplete,
+                    uploadError
                   )}
                 {/* Form per aggiungere una stagione */}
                 {showStagioneForm &&
@@ -623,7 +655,11 @@ const Admin = () => {
                     sezioni,
                     selectedSezioneId,
                     setSelectedSezioneId,
-                    handleStagioneFileChange
+                    handleStagioneFileChange,
+                    isUploading,
+                    progress,
+                    uploadComplete,
+                    uploadError
                   )}
                 {/* Form per aggiungere un video */}
                 {showVideoForm &&
@@ -654,7 +690,9 @@ const Admin = () => {
           <Col md={5} className="section-admin">
             <div className="button-group">
               <Button className="button-admin">Edit Film</Button>
-              <Button className="button-admin">Edit Serie TV</Button>
+              <Button className="button-admin" as={Link} to={"/editvideo"}>
+                Edit Serie TV
+              </Button>
             </div>
           </Col>
           <Col md={5} className="section-admin">
@@ -752,7 +790,6 @@ const renderFilmForm = (
     </Form>
   </div>
 );
-
 // Form per aggiungere una sezione
 const renderSezioneForm = (
   handleSezioneSubmit,
@@ -762,7 +799,11 @@ const renderSezioneForm = (
   tagOptions,
   handleSezioneTagChange,
   showTagList,
-  setShowTagList
+  setShowTagList,
+  isUploading,
+  progress,
+  uploadComplete,
+  uploadError
 ) => (
   <div className="mt-3">
     <Form onSubmit={handleSezioneSubmit}>
@@ -824,9 +865,26 @@ const renderSezioneForm = (
         />
       </Form.Group>
 
-      <Button type="submit" className="button-admin">
-        Aggiungi Sezione
+      <Button type="submit" className="button-admin" disabled={isUploading}>
+        {isUploading ? "Caricamento..." : "Aggiungi Sezione"}
       </Button>
+
+      {/* Barra di avanzamento durante il caricamento */}
+      {isUploading && (
+        <div className="mt-3">
+          <ProgressBar now={progress} label={`${progress}%`} />
+        </div>
+      )}
+
+      {/* Messaggi di successo o errore */}
+      {uploadComplete && (
+        <div className="mt-3 text-success">✅ Sezione creata con successo!</div>
+      )}
+      {uploadError && (
+        <div className="mt-3 text-danger">
+          ❌ Errore nella creazione della sezione: {uploadError}
+        </div>
+      )}
     </Form>
   </div>
 );
@@ -839,7 +897,11 @@ const renderStagioneForm = (
   sezioni,
   selectedSezioneId,
   setSelectedSezioneId,
-  handleStagioneFileChange
+  handleStagioneFileChange,
+  isUploading,
+  progress,
+  uploadComplete,
+  uploadError
 ) => (
   <div className="form-container mt-3">
     <Form onSubmit={handleStagioneSubmit}>
@@ -879,8 +941,8 @@ const renderStagioneForm = (
         <Form.Control
           as="select"
           name="sezioneId"
-          value={selectedSezioneId} // Valore corretto
-          onChange={(e) => setSelectedSezioneId(e.target.value)} // Gestisci il cambiamento
+          value={selectedSezioneId}
+          onChange={(e) => setSelectedSezioneId(e.target.value)}
         >
           <option value="">Seleziona una sezione</option>
           {sezioni.map((sezione) => (
@@ -891,7 +953,29 @@ const renderStagioneForm = (
         </Form.Control>
       </Form.Group>
 
-      <Button type="submit">Crea Stagione</Button>
+      {/* Pulsante di invio bloccato durante l'upload */}
+      <Button type="submit" className="mt-3" disabled={isUploading}>
+        {isUploading ? "Caricamento..." : "Crea Stagione"}
+      </Button>
+
+      {/* Barra di avanzamento durante il caricamento */}
+      {isUploading && (
+        <div className="mt-3">
+          <ProgressBar now={progress} label={`${progress}%`} />
+        </div>
+      )}
+
+      {/* Messaggi di successo o errore */}
+      {uploadComplete && (
+        <div className="mt-3 text-success">
+          ✅ Stagione creata con successo!
+        </div>
+      )}
+      {uploadError && (
+        <div className="mt-3 text-danger">
+          ❌ Errore nella creazione della stagione: {uploadError}
+        </div>
+      )}
     </Form>
   </div>
 );
