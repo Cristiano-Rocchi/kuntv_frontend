@@ -62,14 +62,25 @@ const Admin = () => {
   const cancelTokenSource = useRef(null); // Token per annullare l'upload
   const [showVideoOptions, setShowVideoOptions] = useState(false); // Stato per mostrare/nascondere bottoni per le opzioni di video
   const [showMultiVideoModal, setShowMultiVideoModal] = useState(false);
+  // Stato per tenere traccia dei video in attesa di essere caricati (coda)
+  const [uploadQueue, setUploadQueue] = useState([]);
+
+  // Stato per tenere traccia di quale video è attualmente in upload
+  const [uploadingIndex, setUploadingIndex] = useState(null);
 
   const [multiVideoData, setMultiVideoData] = useState(
-    Array(10).fill({
-      titolo: "",
-      durata: "",
-      file: null,
-      stagioneId: "",
-    })
+    Array(10)
+      .fill()
+      .map(() => ({
+        titolo: "",
+        durata: "",
+        file: null,
+        stagioneId: "",
+        isUploading: false, // Nuovo stato di caricamento per ogni form
+        progress: 0, // Stato del progresso di upload per ogni form
+        uploadPhase: "", // Fase di upload per ogni form
+        uploadComplete: false, // Stato di completamento per ogni form
+      }))
   );
 
   // -------------------FUNZIONI DI VISUALIZZAZIONE-------------------
@@ -178,20 +189,23 @@ const Admin = () => {
       });
     }
   };
-  const handleVideoInputChange = (e) => {
+  const handleVideoInputChange = (e, index) => {
     const { name, value } = e.target;
-    setVideoData({
-      ...videoData,
-      [name]: value,
+    setMultiVideoData((prevState) => {
+      const newState = [...prevState];
+      newState[index] = { ...newState[index], [name]: value };
+      return newState;
     });
   };
 
   // Funzione per gestire il caricamento del file VIDEO
 
-  const handleVideoFileChange = (e) => {
-    setVideoData({
-      ...videoData,
-      file: e.target.files[0],
+  const handleVideoFileChange = (e, index) => {
+    const file = e.target.files[0];
+    setMultiVideoData((prevState) => {
+      const newState = [...prevState];
+      newState[index] = { ...newState[index], file };
+      return newState;
     });
   };
 
@@ -426,38 +440,67 @@ const Admin = () => {
 
   // Funzione per la creazione di un nuovo VIDEO
 
-  const handleVideoSubmit = async (e) => {
+  const handleVideoSubmit = async (e, index) => {
     e.preventDefault();
 
-    if (
-      !videoData.titolo ||
-      !videoData.durata ||
-      !videoData.file ||
-      !videoData.stagioneId
-    ) {
+    const video = multiVideoData[index];
+
+    if (!video.titolo || !video.durata || !video.file || !video.stagioneId) {
       alert("⚠️ Compila tutti i campi obbligatori.");
       return;
     }
 
-    setProgress(0);
-    setIsUploading(true);
-    setUploadPhase("Compressione in corso...");
-    setUploadComplete(false);
+    // Se c'è già un upload in corso, mettiamo il video in coda
+    if (uploadingIndex !== null) {
+      setUploadQueue((prevQueue) => [...prevQueue, index]);
+      return;
+    }
 
+    // Se nessun upload è in corso, avvia direttamente l'upload
+    startVideoUpload(index);
+  };
+  const startVideoUpload = async (index) => {
+    setUploadingIndex(index); // Segniamo questo video come "in upload"
+
+    const video = multiVideoData[index];
+    const cancelToken = axios.CancelToken.source();
+
+    // Aggiorniamo lo stato solo per il video specifico
+    setMultiVideoData((prevState) => {
+      const newState = [...prevState];
+      newState[index] = {
+        ...newState[index],
+        isUploading: true,
+        progress: 0,
+        uploadPhase: "Compressione in corso...",
+        uploadComplete: false,
+        cancelToken, // Salviamo il token per poterlo usare dopo
+      };
+      return newState;
+    });
+
+    // Simuliamo la compressione (0% -> 50%)
     for (let i = 0; i <= 50; i += 10) {
       await new Promise((resolve) => setTimeout(resolve, 500));
-      setProgress(i);
+      setMultiVideoData((prevState) => {
+        const newState = [...prevState];
+        newState[index].progress = i;
+        return newState;
+      });
     }
 
     const formData = new FormData();
-    formData.append("titolo", videoData.titolo);
-    formData.append("durata", videoData.durata);
-    formData.append("file", videoData.file);
-    formData.append("stagioneId", videoData.stagioneId);
+    formData.append("titolo", video.titolo);
+    formData.append("durata", video.durata);
+    formData.append("file", video.file);
+    formData.append("stagioneId", video.stagioneId);
 
     try {
-      setUploadPhase("Caricamento in corso...");
-      cancelTokenSource.current = axios.CancelToken.source();
+      setMultiVideoData((prevState) => {
+        const newState = [...prevState];
+        newState[index].uploadPhase = "Caricamento in corso...";
+        return newState;
+      });
 
       const response = await axios.post(
         "http://localhost:3001/api/video/upload",
@@ -471,50 +514,72 @@ const Admin = () => {
             const percentCompleted = Math.round(
               (progressEvent.loaded * 50) / progressEvent.total + 50
             );
-            setProgress(percentCompleted);
+            setMultiVideoData((prevState) => {
+              const newState = [...prevState];
+              newState[index].progress = percentCompleted;
+              return newState;
+            });
           },
-          cancelToken: cancelTokenSource.current.token,
+          cancelToken: cancelToken.token, // Usa il token per annullare
         }
       );
 
-      // ✅ Se lo status è 200 o 201, mostriamo un alert di successo
       if (response.status === 200 || response.status === 201) {
         console.log("✅ Video caricato con successo:", response.data);
-        setUploadPhase("✅ Caricamento completato con successo!");
-        setUploadComplete(true);
+        setMultiVideoData((prevState) => {
+          const newState = [...prevState];
+          newState[index] = {
+            titolo: "",
+            durata: "",
+            file: null,
+            stagioneId: "",
+            isUploading: false,
+            progress: 100,
+            uploadPhase: "✅ Caricamento completato!",
+            uploadComplete: true,
+            cancelToken: null,
+          };
+          return newState;
+        });
 
-        // 🔥 Mostra alert di successo
-        alert("✅ Video caricato con successo!");
-
-        setVideoData({ titolo: "", durata: "", file: null, stagioneId: "" });
-
-        document.getElementById("formFileVideo").value = "";
-
-        setTimeout(() => {
-          setIsUploading(false);
-          setProgress(0);
-        }, 2000);
+        // Passiamo al prossimo video nella coda
+        processNextUpload();
       } else {
-        console.error("Errore durante la creazione del video:", response.data);
-        setUploadPhase("❌ Errore nel caricamento!");
-        setIsUploading(false);
-
-        // 🔥 Mostra alert di errore
-        alert("❌ Errore durante il caricamento del video!");
+        throw new Error("Errore durante il caricamento!");
       }
     } catch (error) {
       if (axios.isCancel(error)) {
-        setUploadPhase("⛔ Upload annullato!");
         alert("⛔ Upload annullato!");
       } else {
         console.error("Errore nella richiesta:", error.message);
-        setUploadPhase("❌ Errore nella richiesta!");
-
-        // 🔥 Mostra alert di errore con il messaggio dettagliato
         alert(`❌ Errore: ${error.message}`);
       }
-      setIsUploading(false);
+      setMultiVideoData((prevState) => {
+        const newState = [...prevState];
+        newState[index].isUploading = false;
+        return newState;
+      });
+
+      // Passiamo al prossimo video nella coda anche se c'è stato un errore
+      processNextUpload();
     }
+  };
+
+  const processNextUpload = () => {
+    setUploadingIndex(null); // Reset dell'upload attivo
+
+    setUploadQueue((prevQueue) => {
+      if (prevQueue.length > 0) {
+        const [nextIndex, ...remainingQueue] = prevQueue; // Prende il primo in coda
+        startVideoUpload(nextIndex); // Avvia il prossimo video
+        return remainingQueue; // Rimuove il video appena partito dalla coda
+      }
+      return []; // Se non ci sono più video in coda, la lista resta vuota
+    });
+  };
+
+  const handleRemoveFromQueue = (index) => {
+    setUploadQueue((prevQueue) => prevQueue.filter((i) => i !== index));
   };
 
   // Effettua una richiesta per ottenere le SEZIONI
@@ -735,7 +800,7 @@ const Admin = () => {
         >
           <div
             className="multi-video-modal"
-            onClick={(e) => e.stopPropagation()} // Evita la chiusura quando clicchiamo dentro
+            onClick={(e) => e.stopPropagation()}
           >
             <button
               className="close-modal-btn"
@@ -761,14 +826,18 @@ const Admin = () => {
                       newMultiVideoData[index] = newVideo;
                       setMultiVideoData(newMultiVideoData);
                     },
-                    handleVideoInputChange,
-                    handleVideoFileChange,
-                    handleVideoSubmit,
-                    isUploading,
-                    progress,
-                    uploadPhase,
-                    uploadComplete,
-                    cancelTokenSource
+                    (e) => handleVideoInputChange(e, index), // Passiamo l'index giusto!
+                    (e) => handleVideoFileChange(e, index), // Anche per il file!
+                    (e) => handleVideoSubmit(e, index), // Anche per il submit!
+                    video.isUploading,
+                    video.progress,
+                    video.uploadPhase,
+                    video.uploadComplete,
+                    cancelTokenSource,
+                    uploadQueue,
+                    uploadingIndex,
+                    index,
+                    handleRemoveFromQueue
                   )}
                 </div>
               ))}
@@ -1073,9 +1142,17 @@ const renderVideoForm = (
   progress,
   uploadPhase,
   uploadComplete,
-  cancelTokenSource
+  cancelTokenSource,
+  uploadQueue,
+  uploadingIndex,
+  index,
+  handleRemoveFromQueue
 ) => (
   <div className="form-container mt-3">
+    {uploadQueue.includes(index) && (
+      <div className="alert alert-warning text-center">🕐 In coda...</div>
+    )}
+
     {/* Dropdown per le sezioni */}
     <Form.Group controlId="formSezioneVideo">
       <Form.Label>Sezione</Form.Label>
@@ -1163,9 +1240,11 @@ const renderVideoForm = (
           </Form.Group>
 
           {/* Pulsante di invio bloccato durante l'upload */}
-          <Button type="submit" className="button-admin" disabled={isUploading}>
-            {isUploading ? "Caricamento..." : "Invia Video"}
-          </Button>
+          {!uploadQueue.includes(index) && !isUploading && (
+            <Button type="submit" className="button-admin">
+              Invia Video
+            </Button>
+          )}
 
           {/* Pulsante Stop per annullare l'upload */}
           {isUploading && (
@@ -1178,6 +1257,17 @@ const renderVideoForm = (
               }}
             >
               Stop
+            </Button>
+          )}
+
+          {/* Pulsante per rimuovere il video dalla coda */}
+          {uploadQueue.includes(index) && !isUploading && (
+            <Button
+              variant="warning"
+              className="ml-2"
+              onClick={() => handleRemoveFromQueue(index)}
+            >
+              Rimuovi dalla coda
             </Button>
           )}
 
