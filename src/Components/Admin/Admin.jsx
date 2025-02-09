@@ -459,13 +459,24 @@ const Admin = () => {
     // Se nessun upload è in corso, avvia direttamente l'upload
     startVideoUpload(index);
   };
-  const startVideoUpload = async (index) => {
-    setUploadingIndex(index); // Segniamo questo video come "in upload"
 
+  const processNextUpload = () => {
+    setUploadingIndex(null); // Reset dell'upload attivo
+
+    setUploadQueue((prevQueue) => {
+      if (prevQueue.length > 0) {
+        const [nextIndex, ...remainingQueue] = prevQueue; // Prende solo il primo in coda
+        startVideoUpload(nextIndex); // Avvia solo UN video
+        return remainingQueue; // Rimuove SOLO il video appena partito dalla coda
+      }
+      return []; // Se non ci sono più video in coda, la lista resta vuota
+    });
+  };
+  const startVideoUpload = async (index) => {
+    setUploadingIndex(index); // Indichiamo quale video è in upload
     const video = multiVideoData[index];
     const cancelToken = axios.CancelToken.source();
 
-    // Aggiorniamo lo stato solo per il video specifico
     setMultiVideoData((prevState) => {
       const newState = [...prevState];
       newState[index] = {
@@ -474,20 +485,10 @@ const Admin = () => {
         progress: 0,
         uploadPhase: "Compressione in corso...",
         uploadComplete: false,
-        cancelToken, // Salviamo il token per poterlo usare dopo
+        cancelToken,
       };
       return newState;
     });
-
-    // Simuliamo la compressione (0% -> 50%)
-    for (let i = 0; i <= 50; i += 10) {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setMultiVideoData((prevState) => {
-        const newState = [...prevState];
-        newState[index].progress = i;
-        return newState;
-      });
-    }
 
     const formData = new FormData();
     formData.append("titolo", video.titolo);
@@ -512,7 +513,7 @@ const Admin = () => {
           },
           onUploadProgress: (progressEvent) => {
             const percentCompleted = Math.round(
-              (progressEvent.loaded * 50) / progressEvent.total + 50
+              (progressEvent.loaded * 100) / progressEvent.total
             );
             setMultiVideoData((prevState) => {
               const newState = [...prevState];
@@ -520,19 +521,17 @@ const Admin = () => {
               return newState;
             });
           },
-          cancelToken: cancelToken.token, // Usa il token per annullare
+          cancelToken: cancelToken.token,
         }
       );
 
       if (response.status === 200 || response.status === 201) {
         console.log("✅ Video caricato con successo:", response.data);
+
         setMultiVideoData((prevState) => {
           const newState = [...prevState];
           newState[index] = {
-            titolo: "",
-            durata: "",
-            file: null,
-            stagioneId: "",
+            ...newState[index],
             isUploading: false,
             progress: 100,
             uploadPhase: "✅ Caricamento completato!",
@@ -541,41 +540,19 @@ const Admin = () => {
           };
           return newState;
         });
-
-        // Passiamo al prossimo video nella coda
-        processNextUpload();
       } else {
         throw new Error("Errore durante il caricamento!");
       }
     } catch (error) {
       if (axios.isCancel(error)) {
-        alert("⛔ Upload annullato!");
+        console.log("⛔ Upload annullato!");
       } else {
-        console.error("Errore nella richiesta:", error.message);
-        alert(`❌ Errore: ${error.message}`);
+        console.error("❌ Errore nella richiesta:", error.message);
       }
-      setMultiVideoData((prevState) => {
-        const newState = [...prevState];
-        newState[index].isUploading = false;
-        return newState;
-      });
-
-      // Passiamo al prossimo video nella coda anche se c'è stato un errore
+    } finally {
+      setUploadingIndex(null);
       processNextUpload();
     }
-  };
-
-  const processNextUpload = () => {
-    setUploadingIndex(null); // Reset dell'upload attivo
-
-    setUploadQueue((prevQueue) => {
-      if (prevQueue.length > 0) {
-        const [nextIndex, ...remainingQueue] = prevQueue; // Prende il primo in coda
-        startVideoUpload(nextIndex); // Avvia il prossimo video
-        return remainingQueue; // Rimuove il video appena partito dalla coda
-      }
-      return []; // Se non ci sono più video in coda, la lista resta vuota
-    });
   };
 
   const handleRemoveFromQueue = (index) => {
