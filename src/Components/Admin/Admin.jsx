@@ -452,7 +452,13 @@ const Admin = () => {
 
     // Se c'è già un upload in corso, mettiamo il video in coda
     if (uploadingIndex !== null) {
-      setUploadQueue((prevQueue) => [...prevQueue, index]);
+      setUploadQueue((prevQueue) => {
+        if (!prevQueue.includes(index)) {
+          // Evita duplicati nella coda
+          return [...prevQueue, index];
+        }
+        return prevQueue; // Mantieni la coda invariata se il video è già presente
+      });
       return;
     }
 
@@ -465,13 +471,19 @@ const Admin = () => {
 
     setUploadQueue((prevQueue) => {
       if (prevQueue.length > 0) {
-        const [nextIndex, ...remainingQueue] = prevQueue; // Prende solo il primo in coda
-        startVideoUpload(nextIndex); // Avvia solo UN video
-        return remainingQueue; // Rimuove SOLO il video appena partito dalla coda
+        const nextIndex = prevQueue[0]; // Prende SOLO il primo video della coda
+        const newQueue = prevQueue.slice(1); // Rimuove SOLO il primo dalla coda
+
+        setTimeout(() => {
+          startVideoUpload(nextIndex); // 🔥 Avvia SOLO il prossimo video
+        }, 500); // Ritardo per evitare conflitti
+
+        return newQueue; // Restituisce la coda aggiornata senza il video avviato
       }
-      return []; // Se non ci sono più video in coda, la lista resta vuota
+      return []; // Se la coda è vuota, la lasciamo vuota
     });
   };
+
   const startVideoUpload = async (index) => {
     setUploadingIndex(index); // Indichiamo quale video è in upload
     const video = multiVideoData[index];
