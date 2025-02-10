@@ -91,7 +91,7 @@ const EditVideo = () => {
       const response = await fetch(`http://localhost:3001/api/${type}/${id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MzkxOTg0MjQsImV4cCI6MTczOTgwMzIyNCwic3ViIjoiYWRtaW4ifQ.HcHlWxFluX-TZLn8g_CrFtP805jnWHynvLvZR1nV1f6bg-ahPs2gibdFHV1vWP2T0jVtkG-_vNx_qLarnf32DQ`,
         },
       });
 
@@ -159,7 +159,7 @@ const EditVideo = () => {
         `http://localhost:3001/api/sezioni?${queryParams.toString()}`,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MzkxOTg0MjQsImV4cCI6MTczOTgwMzIyNCwic3ViIjoiYWRtaW4ifQ.HcHlWxFluX-TZLn8g_CrFtP805jnWHynvLvZR1nV1f6bg-ahPs2gibdFHV1vWP2T0jVtkG-_vNx_qLarnf32DQ`,
           },
         }
       );
@@ -179,7 +179,7 @@ const EditVideo = () => {
     try {
       const response = await fetch("http://localhost:3001/api/stagioni", {
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MzkxOTg0MjQsImV4cCI6MTczOTgwMzIyNCwic3ViIjoiYWRtaW4ifQ.HcHlWxFluX-TZLn8g_CrFtP805jnWHynvLvZR1nV1f6bg-ahPs2gibdFHV1vWP2T0jVtkG-_vNx_qLarnf32DQ`,
         },
       });
 
@@ -206,7 +206,7 @@ const EditVideo = () => {
         `http://localhost:3001/api/video?${queryParams.toString()}`,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MzkxOTg0MjQsImV4cCI6MTczOTgwMzIyNCwic3ViIjoiYWRtaW4ifQ.HcHlWxFluX-TZLn8g_CrFtP805jnWHynvLvZR1nV1f6bg-ahPs2gibdFHV1vWP2T0jVtkG-_vNx_qLarnf32DQ`,
           },
         }
       );
@@ -226,7 +226,7 @@ const EditVideo = () => {
     try {
       const response = await fetch("http://localhost:3001/api/sezioni/tags", {
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MzkxOTg0MjQsImV4cCI6MTczOTgwMzIyNCwic3ViIjoiYWRtaW4ifQ.HcHlWxFluX-TZLn8g_CrFtP805jnWHynvLvZR1nV1f6bg-ahPs2gibdFHV1vWP2T0jVtkG-_vNx_qLarnf32DQ`,
         },
       });
       if (!response.ok) throw new Error("Errore nel recupero dei tags");

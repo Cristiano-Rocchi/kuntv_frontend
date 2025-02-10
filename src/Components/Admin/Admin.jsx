@@ -250,7 +250,7 @@ const Admin = () => {
         formData,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MzkxOTg0MjQsImV4cCI6MTczOTgwMzIyNCwic3ViIjoiYWRtaW4ifQ.HcHlWxFluX-TZLn8g_CrFtP805jnWHynvLvZR1nV1f6bg-ahPs2gibdFHV1vWP2T0jVtkG-_vNx_qLarnf32DQ`,
             "Content-Type": "multipart/form-data",
           },
           onUploadProgress: (progressEvent) => {
@@ -338,7 +338,7 @@ const Admin = () => {
         formData,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MzkxOTg0MjQsImV4cCI6MTczOTgwMzIyNCwic3ViIjoiYWRtaW4ifQ.HcHlWxFluX-TZLn8g_CrFtP805jnWHynvLvZR1nV1f6bg-ahPs2gibdFHV1vWP2T0jVtkG-_vNx_qLarnf32DQ`,
             "Content-Type": "multipart/form-data",
           },
           onUploadProgress: (progressEvent) => {
@@ -411,7 +411,7 @@ const Admin = () => {
         formData,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MzkxOTg0MjQsImV4cCI6MTczOTgwMzIyNCwic3ViIjoiYWRtaW4ifQ.HcHlWxFluX-TZLn8g_CrFtP805jnWHynvLvZR1nV1f6bg-ahPs2gibdFHV1vWP2T0jVtkG-_vNx_qLarnf32DQ`,
             "Content-Type": "multipart/form-data",
           },
           onUploadProgress: (progressEvent) => {
@@ -520,7 +520,7 @@ const Admin = () => {
         formData,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MzkxOTg0MjQsImV4cCI6MTczOTgwMzIyNCwic3ViIjoiYWRtaW4ifQ.HcHlWxFluX-TZLn8g_CrFtP805jnWHynvLvZR1nV1f6bg-ahPs2gibdFHV1vWP2T0jVtkG-_vNx_qLarnf32DQ`,
             "Content-Type": "multipart/form-data",
           },
           onUploadProgress: (progressEvent) => {
@@ -577,7 +577,7 @@ const Admin = () => {
       try {
         const response = await fetch("http://localhost:3001/api/sezioni", {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MzkxOTg0MjQsImV4cCI6MTczOTgwMzIyNCwic3ViIjoiYWRtaW4ifQ.HcHlWxFluX-TZLn8g_CrFtP805jnWHynvLvZR1nV1f6bg-ahPs2gibdFHV1vWP2T0jVtkG-_vNx_qLarnf32DQ`,
           },
         });
         if (response.ok) {
@@ -605,7 +605,7 @@ const Admin = () => {
         `http://localhost:3001/api/stagioni/sezione/${sezioneId}`,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MzkxOTg0MjQsImV4cCI6MTczOTgwMzIyNCwic3ViIjoiYWRtaW4ifQ.HcHlWxFluX-TZLn8g_CrFtP805jnWHynvLvZR1nV1f6bg-ahPs2gibdFHV1vWP2T0jVtkG-_vNx_qLarnf32DQ`,
           },
         }
       );
@@ -630,7 +630,7 @@ const Admin = () => {
       try {
         const response = await fetch("http://localhost:3001/api/sezioni/tags", {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzg1ODk3NzUsImV4cCI6MTczOTE5NDU3NSwic3ViIjoiYWRtaW4ifQ.H9ApFFFE5CirNPk1F4TSPHqxAxsRP9S1iNB53PUKfoxBmAO7-WtE8koiTQOHgfYIE3VZ3EBlJzKCqvetAEKAgQ`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MzkxOTg0MjQsImV4cCI6MTczOTgwMzIyNCwic3ViIjoiYWRtaW4ifQ.HcHlWxFluX-TZLn8g_CrFtP805jnWHynvLvZR1nV1f6bg-ahPs2gibdFHV1vWP2T0jVtkG-_vNx_qLarnf32DQ`,
           },
         });
 
@@ -696,12 +696,6 @@ const Admin = () => {
                   </Button>
                   {showVideoOptions && (
                     <div className="mt-3">
-                      <Button
-                        className="button-tvseries"
-                        onClick={() => setShowVideoForm(true)}
-                      >
-                        Video Singolo
-                      </Button>
                       <Button
                         className="button-tvseries"
                         onClick={() => setShowMultiVideoModal(true)}
@@ -782,6 +776,7 @@ const Admin = () => {
           </Col>
         </Row>
       </Container>
+      {/*----- MODALE per aggiungere fino a 10 VIDEO--------- */}{" "}
       {showMultiVideoModal && (
         <div
           className="multi-video-overlay"
