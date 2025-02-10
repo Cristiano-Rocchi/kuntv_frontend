@@ -810,9 +810,9 @@ const Admin = () => {
                       newMultiVideoData[index] = newVideo;
                       setMultiVideoData(newMultiVideoData);
                     },
-                    (e) => handleVideoInputChange(e, index), // Passiamo l'index giusto!
-                    (e) => handleVideoFileChange(e, index), // Anche per il file!
-                    (e) => handleVideoSubmit(e, index), // Anche per il submit!
+                    (e) => handleVideoInputChange(e, index),
+                    (e) => handleVideoFileChange(e, index),
+                    (e) => handleVideoSubmit(e, index),
                     video.isUploading,
                     video.progress,
                     video.uploadPhase,
