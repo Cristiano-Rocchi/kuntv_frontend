@@ -41,8 +41,10 @@ const Home = () => {
 
   return (
     <div className="body">
-      <h1>ciao</h1>
       <div className="home-container">
+        <div className="text-center pt-5 pb-2">
+          <h3>Titoli Del Momento</h3>
+        </div>
         <Swiper
           effect="coverflow"
           grabCursor={true}
