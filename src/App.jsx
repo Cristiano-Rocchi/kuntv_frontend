@@ -6,6 +6,7 @@ import Home from "./Components/Home/Home";
 import TvSeries from "./Components/TvSeries/TvSeries";
 import Admin from "./Components/Admin/Admin";
 import EditVideo from "./Components/EditVideo/EditVideo";
+import SectionDetail from "./Components/SectionDetail/SectionDetail";
 
 const App = () => {
   const location = useLocation();
@@ -19,6 +20,8 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/home/:nomeSezione" element={<SectionDetail />} />
+
         <Route path="/tvseries" element={<TvSeries />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/editvideo" element={<EditVideo />} />

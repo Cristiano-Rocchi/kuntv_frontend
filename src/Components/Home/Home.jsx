@@ -5,9 +5,13 @@ import "swiper/css";
 import "swiper/css/effect-coverflow";
 import "swiper/css/navigation";
 import { EffectCoverflow, Navigation } from "swiper/modules";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+  // -------------------STATI-------------------
   const [sezioni, setSezioni] = useState([]);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSezioni = async () => {
@@ -45,7 +49,8 @@ const Home = () => {
           centeredSlides={true}
           slidesPerView="3"
           loop={true}
-          navigation={true}
+          navigation={false}
+          allowTouchMove={true}
           coverflowEffect={{
             rotate: 0,
             stretch: 0,
@@ -57,8 +62,23 @@ const Home = () => {
           className="mySwiper"
         >
           {sezioni.map((sezione) => (
-            <SwiperSlide key={sezione.id}>
-              <div className="slide-card-home">
+            <SwiperSlide key={sezione.id} className="swiper-slide">
+              <div
+                className={`slide-card-home ${
+                  sezione.id === sezioni[Math.floor(sezioni.length / 2)].id
+                    ? "clickable"
+                    : ""
+                }`}
+                onClick={(e) => {
+                  if (
+                    document
+                      .querySelector(".swiper-slide-active")
+                      ?.contains(e.target)
+                  ) {
+                    navigate(`/home/${sezione.titolo}`);
+                  }
+                }}
+              >
                 <img src={sezione.foto} alt={sezione.titolo} />
                 <h2>{sezione.titolo}</h2>
               </div>

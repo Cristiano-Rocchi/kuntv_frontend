@@ -36,3 +36,16 @@
 .swiper-button-prev {
   color: rgba($primary, 0.4) !important;
 }
+
+.swiper-slide {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  filter: brightness(60%);
+  pointer-events: auto !important;
+}
+
+.swiper-slide-active {
+  filter: brightness(100%);
+}
+.swiper-slide .slide-card-home {
+  cursor: pointer;
+}
