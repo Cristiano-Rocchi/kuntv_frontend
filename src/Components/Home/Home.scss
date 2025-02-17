@@ -4,9 +4,8 @@
   //  no-repeat center center/cover;
   background-color: black;
 }
-
-//Slide iniziale
-.home-container h3 {
+//HOME HEADER SLIDE
+.home-header h3 {
   font-size: 1.6em;
   color: $secondary;
   position: relative;
@@ -28,7 +27,7 @@
     width: 100%;
   }
 }
-.home-container h3:hover {
+.home-header h3:hover {
   scale: 1.1;
 }
 
@@ -69,4 +68,14 @@
 }
 .swiper-slide .slide-card-home {
   cursor: pointer;
+}
+
+//HOME CONTAINER
+.home-container {
+  padding: 1em 3em;
+}
+
+.home-container h4 {
+  font-family: "AnimeFont", sans-serif;
+  color: $primary;
 }

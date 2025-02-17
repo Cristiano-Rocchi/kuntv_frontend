@@ -40,53 +40,54 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="body">
+    <div className="body home-header">
+      <div className="text-center pt-5 pb-2">
+        <h3>Titoli Del Momento</h3>
+      </div>
+      <Swiper
+        effect="coverflow"
+        grabCursor={true}
+        centeredSlides={true}
+        slidesPerView="3"
+        loop={true}
+        navigation={false}
+        allowTouchMove={true}
+        coverflowEffect={{
+          rotate: 0,
+          stretch: 0,
+          depth: 100,
+          modifier: 5,
+          slideShadows: false,
+        }}
+        modules={[EffectCoverflow, Navigation]}
+        className="mySwiper"
+      >
+        {sezioni.map((sezione) => (
+          <SwiperSlide key={sezione.id} className="swiper-slide">
+            <div
+              className={`slide-card-home ${
+                sezione.id === sezioni[Math.floor(sezioni.length / 2)].id
+                  ? "clickable"
+                  : ""
+              }`}
+              onClick={(e) => {
+                if (
+                  document
+                    .querySelector(".swiper-slide-active")
+                    ?.contains(e.target)
+                ) {
+                  navigate(`/home/${sezione.titolo}`);
+                }
+              }}
+            >
+              <img src={sezione.foto} alt={sezione.titolo} />
+              <h2>{sezione.titolo}</h2>
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
       <div className="home-container">
-        <div className="text-center pt-5 pb-2">
-          <h3>Titoli Del Momento</h3>
-        </div>
-        <Swiper
-          effect="coverflow"
-          grabCursor={true}
-          centeredSlides={true}
-          slidesPerView="3"
-          loop={true}
-          navigation={false}
-          allowTouchMove={true}
-          coverflowEffect={{
-            rotate: 0,
-            stretch: 0,
-            depth: 100,
-            modifier: 5,
-            slideShadows: false,
-          }}
-          modules={[EffectCoverflow, Navigation]}
-          className="mySwiper"
-        >
-          {sezioni.map((sezione) => (
-            <SwiperSlide key={sezione.id} className="swiper-slide">
-              <div
-                className={`slide-card-home ${
-                  sezione.id === sezioni[Math.floor(sezioni.length / 2)].id
-                    ? "clickable"
-                    : ""
-                }`}
-                onClick={(e) => {
-                  if (
-                    document
-                      .querySelector(".swiper-slide-active")
-                      ?.contains(e.target)
-                  ) {
-                    navigate(`/home/${sezione.titolo}`);
-                  }
-                }}
-              >
-                <img src={sezione.foto} alt={sezione.titolo} />
-                <h2>{sezione.titolo}</h2>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        <h4>Anime</h4>
       </div>
     </div>
   );

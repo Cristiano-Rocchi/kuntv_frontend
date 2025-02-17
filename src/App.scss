@@ -1,4 +1,11 @@
 @import "../src/Style/variables.scss";
+
+//font
+@font-face {
+  font-family: "AnimeFont";
+  src: url("../src/Assets/Fonts/animeace2_ital.otf") format("opentype");
+}
+
 *,
 *::before,
 *::after {
