@@ -14,6 +14,9 @@ import {
   Col,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { Tooltip } from "react-tooltip";
+import { Info } from "lucide-react";
+import "react-tooltip/dist/react-tooltip.css";
 
 const EditVideo = () => {
   //-------------------STATI-------------------
@@ -463,18 +466,6 @@ const EditVideo = () => {
                   <div className="d-flex mb-3">
                     <input
                       type="text"
-                      placeholder="Cerca per titolo..."
-                      className="form-control me-2"
-                      value={search.titolo}
-                      onChange={(e) =>
-                        setSearch((prev) => ({
-                          ...prev,
-                          titolo: e.target.value,
-                        }))
-                      }
-                    />
-                    <input
-                      type="text"
                       placeholder="Cerca per sezione..."
                       className="form-control me-2"
                       value={search.sezione}
@@ -497,6 +488,30 @@ const EditVideo = () => {
                         }))
                       }
                     />
+                    <input
+                      type="text"
+                      placeholder="Cerca per titolo..."
+                      className="form-control me-2"
+                      value={search.titolo}
+                      onChange={(e) =>
+                        setSearch((prev) => ({
+                          ...prev,
+                          titolo: e.target.value,
+                        }))
+                      }
+                    />
+
+                    <div>
+                      <Info
+                        size={18}
+                        data-tooltip-id="my-tooltip"
+                        style={{ cursor: "pointer" }}
+                      />
+
+                      <Tooltip id="my-tooltip" place="top" effect="solid">
+                        Inserire nome bucket completo es. "kun-tv2"
+                      </Tooltip>
+                    </div>
                     <input
                       type="text"
                       placeholder="Cerca per bucket..."
@@ -624,7 +639,7 @@ const EditVideo = () => {
               className="card mt-5 text-center"
               style={{ backgroundColor: "#f2f2f2" }}
             >
-              <h6 className="mt-3">TOTALE</h6>
+              <h6 className="mt-3 fw-bold">TOTALE</h6>
               <div className="card-body">
                 <p className="card-title">
                   Sezioni:{" "}
