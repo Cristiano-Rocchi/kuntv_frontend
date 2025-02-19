@@ -1,4 +1,11 @@
 @import "../src/Style/variables.scss";
+
+//font
+@font-face {
+  font-family: "AnimeFont";
+  src: url("../src/Assets/Fonts/animeace2_ital.otf") format("opentype");
+}
+
 *,
 *::before,
 *::after {
@@ -6,7 +13,36 @@
   margin: 0;
   padding: 0;
 }
+
 .body {
-  background-color: black;
-  padding-top: 91px;
+  padding-top: 91px; //altezza della navbar
+  background: rgb(0, 0, 0);
+  background: linear-gradient(
+    176deg,
+    rgba(0, 0, 0, 1) 26%,
+    rgba(62, 51, 15, 1) 99%
+  );
+}
+.container {
+  padding: 0;
+  margin: 0;
+}
+.section-admin {
+  display: flex;
+  flex-direction: column; /* Imposta un layout a colonna */
+  justify-content: flex-start; /* Mantieni gli elementi in alto */
+  align-items: flex-start; /* Allinea a sinistra */
+  height: auto; /* Imposta l'altezza dinamica */
+  border: 1px solid $primary;
+  margin: 1em;
+  padding: 2em;
+}
+
+.form-container {
+  margin-top: 20px; /* Spazio tra i bottoni e i form */
+  width: 100%; /* Adatta la larghezza al contenitore */
+}
+
+.text-gold {
+  color: $primary;
 }

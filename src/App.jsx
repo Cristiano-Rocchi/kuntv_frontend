@@ -4,6 +4,9 @@ import LoginPage from "./Components/LoginPage/LoginPage";
 import MyNavbar from "./Components/Navbar/MyNavbar";
 import Home from "./Components/Home/Home";
 import TvSeries from "./Components/TvSeries/TvSeries";
+import Admin from "./Components/Admin/Admin";
+import EditVideo from "./Components/EditVideo/EditVideo";
+import SectionDetail from "./Components/SectionDetail/SectionDetail";
 
 const App = () => {
   const location = useLocation();
@@ -11,11 +14,17 @@ const App = () => {
   return (
     <>
       {/* Mostra la navbar solo se non ci troviamo nel percorso "/" */}
-      {location.pathname !== "/" && <MyNavbar />}
+      {location.pathname !== "/" && location.pathname !== "/editvideo" && (
+        <MyNavbar />
+      )}
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/home/:nomeSezione" element={<SectionDetail />} />
+
         <Route path="/tvseries" element={<TvSeries />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/editvideo" element={<EditVideo />} />
       </Routes>
     </>
   );
