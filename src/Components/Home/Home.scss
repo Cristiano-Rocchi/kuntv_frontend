@@ -7,28 +7,7 @@
 //HOME HEADER SLIDE
 .home-header h3 {
   font-size: 1.6em;
-  color: $secondary;
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -5px;
-    width: 0;
-    height: 2px; // spessore della linea
-    background-color: $primary; // colore della linea
-    transition: width 0.3s ease-in-out;
-  }
-
-  &:hover::after {
-    width: 100%;
-  }
-}
-.home-header h3:hover {
-  scale: 1.1;
+  color: $primary;
 }
 
 .slide-card-home {
@@ -52,12 +31,15 @@
   bottom: 20px;
   left: 10px;
   color: white;
+  background-color: rgb($primary, 0.5);
   font-size: 18px;
   font-weight: bold;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  border-radius: 10px;
 }
 
-.swiper-slide {
+.swiper-slide-header {
   transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
   filter: brightness(60%);
   pointer-events: auto !important;
@@ -66,7 +48,7 @@
 .swiper-slide-active {
   filter: brightness(100%);
 }
-.swiper-slide .slide-card-home {
+.swiper-slide-header .slide-card-home {
   cursor: pointer;
 }
 
@@ -78,4 +60,29 @@
 .home-container h4 {
   font-family: "AnimeFont", sans-serif;
   color: $primary;
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 0;
+    height: 2px; // spessore della linea
+    background-color: white; // colore della linea
+    transition: width 0.3s ease-in-out;
+  }
+
+  &:hover::after {
+    width: 100%;
+  }
+}
+
+.home-container h4:hover {
+  scale: 1.1;
+}
+.swiper-slide-container img {
+  object-fit: cover;
 }

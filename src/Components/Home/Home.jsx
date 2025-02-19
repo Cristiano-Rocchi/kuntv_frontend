@@ -4,7 +4,8 @@ import { SwiperSlide, Swiper } from "swiper/react";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
 import "swiper/css/navigation";
-import { EffectCoverflow, Navigation } from "swiper/modules";
+import "swiper/css/pagination";
+import { EffectCoverflow, Navigation, Pagination } from "swiper/modules";
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {
@@ -42,7 +43,7 @@ const Home = () => {
   return (
     <div className="body home-header">
       <div className="text-center pt-5 pb-2">
-        <h3>Titoli Del Momento</h3>
+        <h3>TV Dal Vivo</h3>
       </div>
       <Swiper
         effect="coverflow"
@@ -63,7 +64,7 @@ const Home = () => {
         className="mySwiper"
       >
         {sezioni.map((sezione) => (
-          <SwiperSlide key={sezione.id} className="swiper-slide">
+          <SwiperSlide key={sezione.id} className="swiper-slide-header">
             <div
               className={`slide-card-home ${
                 sezione.id === sezioni[Math.floor(sezioni.length / 2)].id
@@ -86,8 +87,37 @@ const Home = () => {
           </SwiperSlide>
         ))}
       </Swiper>
-      <div className="home-container">
-        <h4>Anime</h4>
+      <div className="home-container mt-5">
+        <section id="AnimeSection">
+          {/* ----ANIME---- */}
+          <h4>Anime</h4>
+          <Swiper
+            slidesPerView={5}
+            spaceBetween={100}
+            loop={true}
+            pagination={{
+              clickable: true,
+            }}
+            modules={[Pagination]}
+            className="mySwiper mt-3"
+          >
+            {sezioni
+              .filter((sezione) => sezione.tag.includes("ANIME"))
+              .map((sezione) => (
+                <SwiperSlide
+                  key={sezione.id}
+                  className="swiper-slide-container"
+                >
+                  <img
+                    style={{ width: "300px", height: "200px" }}
+                    src={sezione.foto}
+                    alt={sezione.titolo}
+                  />
+                  <h3>{sezione.titolo}</h3>
+                </SwiperSlide>
+              ))}
+          </Swiper>
+        </section>
       </div>
     </div>
   );
