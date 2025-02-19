@@ -10,6 +10,8 @@ import {
   Container,
   Button,
   Form,
+  Row,
+  Col,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
@@ -18,8 +20,8 @@ const EditVideo = () => {
   const [sezioni, setSezioni] = useState([]);
   const [stagioni, setStagioni] = useState([]);
   const [videos, setVideos] = useState([]);
-  const [tagOptions, setTagOptions] = useState([]); // Lista dei tag presi dal backend
-  const [showTagList, setShowTagList] = useState(false); // Controlla la visibilità della lista
+  const [tagOptions, setTagOptions] = useState([]);
+  const [showTagList, setShowTagList] = useState(false);
 
   const [loading, setLoading] = useState({
     sezioni: true,
@@ -58,7 +60,7 @@ const EditVideo = () => {
     let valueA = a[sortConfig.key];
     let valueB = b[sortConfig.key];
 
-    // Se stiamo ordinando per data, convertiamo in timestamp
+    // ordinando per data convertiamo in timestamp
     if (sortConfig.key === "dataCaricamento") {
       valueA = new Date(valueA).getTime();
       valueB = new Date(valueB).getTime();
@@ -105,6 +107,7 @@ const EditVideo = () => {
       alert(`❌ Error deleting ${type}: ` + error.message);
     }
   };
+
   // Funzione per aggiornare l'ordinamento quando si clicca su un'intestazione
   const requestSort = (key) => {
     let direction = "asc";
@@ -127,14 +130,15 @@ const EditVideo = () => {
 
   //-----------USEEFFECT-------------
 
-  // Carica sezioni in tempo reale mentre scrivi nella barra di ricerca
+  // Carica Sezioni,Video in tempo reale mentre scrivi nella barra di ricerca
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       fetchSezioni();
-    }, 500); // Ritardo di 500ms per evitare chiamate API eccessive
+      fetchVideos();
+    }, 500); // Ritardo di 5sec
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchSezione]); // Si attiva solo quando cambia searchSezione
+  }, [searchSezione, search]);
 
   // Carica stagioni, video e tag SOLO una volta al primo caricamento
   useEffect(() => {
@@ -239,363 +243,410 @@ const EditVideo = () => {
   return (
     <>
       <header className="d-flex justify-content-around mt-3">
-        <h2 className="">⚙️ Admin Dashboard</h2>
+        <h2 className="">Admin Dashboard</h2>
         <div>
-          <Button className="me-3" as={Link} to="/admin">
+          <Button className="me-3 button-admin" as={Link} to="/admin">
             Admin
           </Button>
-          <Button as={Link} to="/home">
+          <Button as={Link} className="button-admin" to="/home">
             Home
           </Button>
         </div>
       </header>
+      <Container fluid className="mt-4">
+        <Row>
+          <Col xs={12} md={11}>
+            <Tab.Container defaultActiveKey="sezioni">
+              <Nav variant="tabs" className="mb-3">
+                <Nav.Item>
+                  <Nav.Link eventKey="sezioni">📂 Sezioni</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="stagioni">📺 Stagioni</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="videos">🎬 Video</Nav.Link>
+                </Nav.Item>
+              </Nav>
 
-      <Container className="mt-4">
-        <Tab.Container defaultActiveKey="sezioni">
-          <Nav variant="tabs" className="mb-3">
-            <Nav.Item>
-              <Nav.Link eventKey="sezioni">📂 Sezioni</Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey="stagioni">📺 Stagioni</Nav.Link>
-            </Nav.Item>
-            <Nav.Item>
-              <Nav.Link eventKey="videos">🎬 Video</Nav.Link>
-            </Nav.Item>
-          </Nav>
+              <Tab.Content>
+                {/*-------------- Sezioni-------------- */}
+                <Tab.Pane eventKey="sezioni">
+                  {loading.sezioni && <Spinner animation="border" />}
+                  {error.sezioni && (
+                    <Alert variant="danger">❌ {error.sezioni}</Alert>
+                  )}
 
-          <Tab.Content>
-            {/*-------------- Sezioni-------------- */}
-            <Tab.Pane eventKey="sezioni">
-              {loading.sezioni && <Spinner animation="border" />}
-              {error.sezioni && (
-                <Alert variant="danger">❌ {error.sezioni}</Alert>
-              )}
+                  {/* Barra di ricerca per le sezioni */}
+                  <div className="d-flex mb-3">
+                    <div className="d-flex">
+                      <div className="me-2">
+                        {" "}
+                        <input
+                          type="text"
+                          placeholder="Cerca per titolo..."
+                          className=" form-control"
+                          value={searchSezione.titolo}
+                          onChange={(e) =>
+                            setSearchSezione({
+                              ...searchSezione,
+                              titolo: e.target.value,
+                            })
+                          }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") fetchSezioni();
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <Form.Group controlId="searchTagSezione">
+                          <Button onClick={() => setShowTagList(!showTagList)}>
+                            {searchSezione.tag.length > 0
+                              ? searchSezione.tag.join(", ")
+                              : "Seleziona i tag"}
+                          </Button>
 
-              {/* Barra di ricerca per le sezioni */}
-              <div className="d-flex mb-3">
-                <div className="d-flex">
-                  <div className="me-2">
-                    {" "}
+                          {showTagList && (
+                            <div className="border p-2 d-flex">
+                              {tagOptions.map((tag) => (
+                                <Form.Check
+                                  key={tag}
+                                  type="checkbox"
+                                  label={tag}
+                                  value={tag}
+                                  checked={searchSezione.tag.includes(tag)}
+                                  onChange={() => toggleTagSelection(tag)}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </Form.Group>
+                      </div>
+                      <div className="me-2">
+                        <input
+                          type="text"
+                          placeholder="Cerca per anno..."
+                          className="form-control"
+                          value={searchSezione.anno}
+                          onChange={(e) =>
+                            setSearchSezione({
+                              ...searchSezione,
+                              anno: e.target.value,
+                            })
+                          }
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") fetchSezioni();
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <Button
+                      variant="primary"
+                      onClick={fetchSezioni}
+                      className="ms-2"
+                    >
+                      🔎 Cerca
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        setSearchSezione({ titolo: "", tag: [], anno: "" });
+                        fetchSezioni();
+                      }}
+                      className="ms-2"
+                    >
+                      ❌ Reset
+                    </Button>
+                  </div>
+
+                  {!loading.sezioni && !error.sezioni && (
+                    <Table striped bordered hover>
+                      <thead>
+                        <tr>
+                          <th>UUID</th>
+                          <th>Titolo</th>
+                          <th>Tag</th>
+                          <th>Anno</th>
+                          <th>Opzioni</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sezioni.map((sezione) => (
+                          <tr key={sezione.id}>
+                            <td>{sezione.id}</td>
+                            <td>{sezione.titolo}</td>
+                            <td>{sezione.tag.join(", ")}</td>
+                            <td>{sezione.anno}</td>
+                            <td>
+                              <Button variant="warning" size="sm" disabled>
+                                ✏️ Edit
+                              </Button>{" "}
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                onClick={() =>
+                                  handleDelete(
+                                    sezione.id,
+                                    "sezioni",
+                                    fetchSezioni
+                                  )
+                                }
+                              >
+                                🗑️ Delete
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  )}
+                </Tab.Pane>
+
+                {/* Stagioni */}
+                <Tab.Pane eventKey="stagioni">
+                  {loading.stagioni && <Spinner animation="border" />}
+                  {error.stagioni && (
+                    <Alert variant="danger">❌ {error.stagioni}</Alert>
+                  )}
+                  {!loading.stagioni && !error.stagioni && (
+                    <Table striped bordered hover>
+                      <thead>
+                        <tr>
+                          <th>UUID</th>
+                          <th>Titolo</th>
+                          <th>Anno</th>
+                          <th>Sezione</th>
+                          <th>Opzioni</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {stagioni.map((stagione) => (
+                          <tr key={stagione.id}>
+                            <td>{stagione.id}</td>
+                            <td>{stagione.titolo}</td>
+                            <td>{stagione.anno}</td>
+                            <td>{stagione.sezioneTitolo}</td>
+                            <td>
+                              <Button variant="warning" size="sm" disabled>
+                                ✏️ Edit
+                              </Button>{" "}
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                onClick={() =>
+                                  handleDelete(
+                                    stagione.id,
+                                    "stagioni",
+                                    fetchStagioni
+                                  )
+                                }
+                              >
+                                🗑️ Delete
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  )}
+                </Tab.Pane>
+
+                {/* Video */}
+                <Tab.Pane eventKey="videos">
+                  {loading.videos && <Spinner animation="border" />}
+                  {error.videos && (
+                    <Alert variant="danger">❌ {error.videos}</Alert>
+                  )}
+
+                  {/* Barra di ricerca Video */}
+                  <div className="d-flex mb-3">
                     <input
                       type="text"
                       placeholder="Cerca per titolo..."
-                      className=" form-control"
-                      value={searchSezione.titolo}
+                      className="form-control me-2"
+                      value={search.titolo}
                       onChange={(e) =>
-                        setSearchSezione({
-                          ...searchSezione,
+                        setSearch((prev) => ({
+                          ...prev,
                           titolo: e.target.value,
-                        })
+                        }))
                       }
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") fetchSezioni();
-                      }}
                     />
-                  </div>
-                  <div>
-                    <Form.Group controlId="searchTagSezione">
-                      <Button onClick={() => setShowTagList(!showTagList)}>
-                        {searchSezione.tag.length > 0
-                          ? searchSezione.tag.join(", ")
-                          : "Seleziona i tag"}
-                      </Button>
-
-                      {showTagList && (
-                        <div className="border p-2 d-flex">
-                          {tagOptions.map((tag) => (
-                            <Form.Check
-                              key={tag}
-                              type="checkbox"
-                              label={tag}
-                              value={tag}
-                              checked={searchSezione.tag.includes(tag)}
-                              onChange={() => toggleTagSelection(tag)}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </Form.Group>
-                  </div>
-                  <div className="me-2">
                     <input
                       type="text"
-                      placeholder="Cerca per anno..."
-                      className="form-control"
-                      value={searchSezione.anno}
+                      placeholder="Cerca per sezione..."
+                      className="form-control me-2"
+                      value={search.sezione}
                       onChange={(e) =>
-                        setSearchSezione({
-                          ...searchSezione,
-                          anno: e.target.value,
-                        })
+                        setSearch((prev) => ({
+                          ...prev,
+                          sezione: e.target.value,
+                        }))
                       }
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") fetchSezioni();
-                      }}
                     />
+                    <input
+                      type="text"
+                      placeholder="Cerca per stagione..."
+                      className="form-control me-2"
+                      value={search.stagione}
+                      onChange={(e) =>
+                        setSearch((prev) => ({
+                          ...prev,
+                          stagione: e.target.value,
+                        }))
+                      }
+                    />
+                    <input
+                      type="text"
+                      placeholder="Cerca per bucket..."
+                      className="form-control"
+                      value={search.bucket}
+                      onChange={(e) =>
+                        setSearch((prev) => ({
+                          ...prev,
+                          bucket: e.target.value,
+                        }))
+                      }
+                    />
+
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        setSearch({
+                          titolo: "",
+                          sezione: "",
+                          stagione: "",
+                          bucket: "",
+                        });
+                      }}
+                      className="ms-2"
+                    >
+                      ❌ Reset
+                    </Button>
                   </div>
-                </div>
-                <div className="dflex"></div>
 
-                <Button
-                  variant="primary"
-                  onClick={fetchSezioni}
-                  className="ms-2"
-                >
-                  🔎 Cerca
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    setSearchSezione({ titolo: "", tag: [], anno: "" });
-                    fetchSezioni();
-                  }}
-                  className="ms-2"
-                >
-                  ❌ Reset
-                </Button>
+                  {!loading.videos && !error.videos && (
+                    <Table striped bordered hover>
+                      <thead>
+                        <tr>
+                          <th>UUID</th>
+                          <th>Titolo</th>
+                          <th>Durata</th>
+                          <th
+                            onClick={() => requestSort("stagioneTitolo")}
+                            style={{ cursor: "pointer" }}
+                          >
+                            Stagione ⬍
+                          </th>
+                          <th
+                            onClick={() => requestSort("sezioneTitolo")}
+                            style={{ cursor: "pointer" }}
+                          >
+                            Sezione ⬍
+                          </th>
+                          <th>Bucket</th>
+                          <th>Link</th>
+                          <th
+                            onClick={() => requestSort("dataCaricamento")}
+                            style={{ cursor: "pointer" }}
+                          >
+                            Data Caricamento ⬍
+                          </th>
+                          <th>Opzioni</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sortedVideos.map((video) => (
+                          <tr key={video.id}>
+                            <td>{video.id}</td>
+                            <td>{video.titolo}</td>
+                            <td>{video.durata}</td>
+                            <td>{video.stagioneTitolo || "N/A"}</td>
+                            <td>{video.sezioneTitolo}</td>
+                            <td>
+                              {video.fileLink
+                                .split(".")[0]
+                                .replace("https://", "")}
+                            </td>
+                            <td>
+                              <Button
+                                variant="link"
+                                size="sm"
+                                onClick={() =>
+                                  navigator.clipboard.writeText(video.fileLink)
+                                }
+                              >
+                                📋 Copia
+                              </Button>{" "}
+                              <Button
+                                variant="link"
+                                size="sm"
+                                href={video.fileLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                🔗 Apri
+                              </Button>
+                            </td>
+                            <td>
+                              {new Date(video.dataCaricamento).toLocaleString()}
+                            </td>
+                            <td>
+                              <Button
+                                variant="outline-warning"
+                                size="sm"
+                                disabled
+                              >
+                                ✏️ Edit
+                              </Button>{" "}
+                              <Button
+                                variant="outline-danger"
+                                size="sm"
+                                onClick={() =>
+                                  handleDelete(video.id, "video", fetchVideos)
+                                }
+                              >
+                                🗑️ Delete
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  )}
+                </Tab.Pane>
+              </Tab.Content>
+            </Tab.Container>
+          </Col>
+          <Col xs={12} md={1}>
+            <div
+              className="card mt-5 text-center"
+              style={{ backgroundColor: "#f2f2f2" }}
+            >
+              <h6 className="mt-3">TOTALE</h6>
+              <div className="card-body">
+                <p className="card-title">
+                  Sezioni:{" "}
+                  <span className="text-success fw-bold">{sezioni.length}</span>
+                </p>
+                <p className="card-title">
+                  Stagioni:{" "}
+                  <span className="text-success fw-bold">
+                    {stagioni.length}
+                  </span>
+                </p>
+                <p className="card-title">
+                  Video:{" "}
+                  <span className="text-success fw-bold ">
+                    {" "}
+                    {videos.length}
+                  </span>{" "}
+                </p>
               </div>
-
-              {!loading.sezioni && !error.sezioni && (
-                <Table striped bordered hover>
-                  <thead>
-                    <tr>
-                      <th>UUID</th>
-                      <th>Titolo</th>
-                      <th>Tag</th>
-                      <th>Anno</th>
-                      <th>Opzioni</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sezioni.map((sezione) => (
-                      <tr key={sezione.id}>
-                        <td>{sezione.id}</td>
-                        <td>{sezione.titolo}</td>
-                        <td>{sezione.tag.join(", ")}</td>
-                        <td>{sezione.anno}</td>
-                        <td>
-                          <Button variant="warning" size="sm" disabled>
-                            ✏️ Edit
-                          </Button>{" "}
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() =>
-                              handleDelete(sezione.id, "sezioni", fetchSezioni)
-                            }
-                          >
-                            🗑️ Delete
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              )}
-            </Tab.Pane>
-
-            {/* Stagioni */}
-            <Tab.Pane eventKey="stagioni">
-              {loading.stagioni && <Spinner animation="border" />}
-              {error.stagioni && (
-                <Alert variant="danger">❌ {error.stagioni}</Alert>
-              )}
-              {!loading.stagioni && !error.stagioni && (
-                <Table striped bordered hover>
-                  <thead>
-                    <tr>
-                      <th>UUID</th>
-                      <th>Titolo</th>
-                      <th>Anno</th>
-                      <th>Sezione</th>
-                      <th>Opzioni</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {stagioni.map((stagione) => (
-                      <tr key={stagione.id}>
-                        <td>{stagione.id}</td>
-                        <td>{stagione.titolo}</td>
-                        <td>{stagione.anno}</td>
-                        <td>{stagione.sezioneTitolo}</td>
-                        <td>
-                          <Button variant="warning" size="sm" disabled>
-                            ✏️ Edit
-                          </Button>{" "}
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() =>
-                              handleDelete(
-                                stagione.id,
-                                "stagioni",
-                                fetchStagioni
-                              )
-                            }
-                          >
-                            🗑️ Delete
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              )}
-            </Tab.Pane>
-
-            {/* Video */}
-            <Tab.Pane eventKey="videos">
-              {loading.videos && <Spinner animation="border" />}
-              {error.videos && (
-                <Alert variant="danger">❌ {error.videos}</Alert>
-              )}
-
-              {/* Barra di ricerca */}
-              <div className="d-flex mb-3">
-                <input
-                  type="text"
-                  placeholder="Cerca per titolo..."
-                  className="form-control me-2"
-                  value={search.titolo}
-                  onChange={(e) =>
-                    setSearch({ ...search, titolo: e.target.value })
-                  }
-                />
-                <input
-                  type="text"
-                  placeholder="Cerca per sezione..."
-                  className="form-control me-2"
-                  value={search.sezione}
-                  onChange={(e) =>
-                    setSearch({ ...search, sezione: e.target.value })
-                  }
-                />
-                <input
-                  type="text"
-                  placeholder="Cerca per stagione..."
-                  className="form-control me-2"
-                  value={search.stagione}
-                  onChange={(e) =>
-                    setSearch({ ...search, stagione: e.target.value })
-                  }
-                />
-                <input
-                  type="text"
-                  placeholder="Cerca per bucket..."
-                  className="form-control"
-                  value={search.bucket}
-                  onChange={(e) =>
-                    setSearch({ ...search, bucket: e.target.value })
-                  }
-                />
-                <Button
-                  variant="primary"
-                  onClick={fetchVideos}
-                  className="ms-2"
-                >
-                  🔎 Cerca
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    setSearch({
-                      titolo: "",
-                      sezione: "",
-                      stagione: "",
-                      bucket: "",
-                    });
-                    fetchVideos();
-                  }}
-                  className="ms-2"
-                >
-                  ❌ Reset
-                </Button>
-              </div>
-
-              {!loading.videos && !error.videos && (
-                <Table striped bordered hover>
-                  <thead>
-                    <tr>
-                      <th>UUID</th>
-                      <th>Titolo</th>
-                      <th>Durata</th>
-                      <th
-                        onClick={() => requestSort("stagioneTitolo")}
-                        style={{ cursor: "pointer" }}
-                      >
-                        Stagione ⬍
-                      </th>
-                      <th
-                        onClick={() => requestSort("sezioneTitolo")}
-                        style={{ cursor: "pointer" }}
-                      >
-                        Sezione ⬍
-                      </th>
-                      <th>Bucket</th>
-                      <th>Link</th>
-                      <th
-                        onClick={() => requestSort("dataCaricamento")}
-                        style={{ cursor: "pointer" }}
-                      >
-                        Data Caricamento ⬍
-                      </th>
-                      <th>Opzioni</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedVideos.map((video) => (
-                      <tr key={video.id}>
-                        <td>{video.id}</td>
-                        <td>{video.titolo}</td>
-                        <td>{video.durata}</td>
-                        <td>{video.stagioneTitolo || "N/A"}</td>
-                        <td>{video.sezioneTitolo}</td>
-                        <td>
-                          {video.fileLink.split(".")[0].replace("https://", "")}
-                        </td>
-                        <td>
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() =>
-                              navigator.clipboard.writeText(video.fileLink)
-                            }
-                          >
-                            📋 Copia
-                          </Button>{" "}
-                          <Button
-                            variant="success"
-                            size="sm"
-                            href={video.fileLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            🔗 Apri
-                          </Button>
-                        </td>
-                        <td>
-                          {new Date(video.dataCaricamento).toLocaleString()}
-                        </td>
-                        <td>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() =>
-                              handleDelete(video.id, "video", fetchVideos)
-                            }
-                          >
-                            🗑️ Delete
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              )}
-            </Tab.Pane>
-          </Tab.Content>
-        </Tab.Container>
+            </div>
+          </Col>
+        </Row>
       </Container>
     </>
   );

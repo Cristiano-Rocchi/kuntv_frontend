@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios"; // Assicurati di avere axios installato
+import axios from "axios";
 import {
   Button,
   Col,
