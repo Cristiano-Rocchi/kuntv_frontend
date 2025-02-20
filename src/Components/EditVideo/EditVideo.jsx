@@ -64,6 +64,12 @@ const EditVideo = () => {
     tag: [],
     anno: "",
   });
+  // filtro ricerca STAGIONI
+  const [searchStagione, setSearchStagione] = useState({
+    titolo: "",
+    sezione: "",
+    anno: "",
+  });
 
   // sorted video
   const [sortConfig, setSortConfig] = useState({
@@ -213,10 +219,11 @@ const EditVideo = () => {
     const delayDebounceFn = setTimeout(() => {
       fetchSezioni();
       fetchVideos();
-    }, 500); // Ritardo di 5sec
+      fetchStagioni();
+    }, 500); // Ritardo di 0.5sec
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchSezione, search]);
+  }, [searchSezione, search, searchStagione]);
 
   // Carica stagioni, video e tag SOLO una volta al primo caricamento
   useEffect(() => {
@@ -259,7 +266,18 @@ const EditVideo = () => {
   // Fetch Stagioni
   const fetchStagioni = async () => {
     try {
-      const response = await fetch("http://localhost:3001/api/stagioni", {
+      setLoading((prev) => ({ ...prev, stagioni: true }));
+      setError((prev) => ({ ...prev, stagioni: null }));
+
+      let url = "http://localhost:3001/api/stagioni?";
+      if (searchStagione.titolo)
+        url += `titolo=${encodeURIComponent(searchStagione.titolo)}&`;
+      if (searchStagione.sezione)
+        url += `sezione=${encodeURIComponent(searchStagione.sezione)}&`;
+      if (searchStagione.anno)
+        url += `anno=${encodeURIComponent(searchStagione.anno)}&`;
+
+      const response = await fetch(url, {
         headers: {
           Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzk4MDM4ODQsImV4cCI6MTc0MDQwODY4NCwic3ViIjoiYWRtaW4ifQ.2ePglJcyk_oItqw1CeBlOVFM_rh-mmGEPIU2DYjKaR8BxXCgPkddoYoPh95bjTrBlw3n2VjgFrPyojEhM9kkvA`,
         },
@@ -319,6 +337,7 @@ const EditVideo = () => {
     }
   };
 
+  // Fetch Video by ID per la modifica e salvataggio del video
   const handleSave = async (videoId) => {
     try {
       setIsLoading(true);
@@ -552,6 +571,62 @@ const EditVideo = () => {
                   {error.stagioni && (
                     <Alert variant="danger">❌ {error.stagioni}</Alert>
                   )}
+                  <div className="d-flex mb-3">
+                    <input
+                      type="text"
+                      placeholder="Cerca per titolo..."
+                      className="form-control me-2"
+                      value={searchStagione.titolo}
+                      onChange={(e) =>
+                        setSearchStagione({
+                          ...searchStagione,
+                          titolo: e.target.value,
+                        })
+                      }
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="Cerca per sezione..."
+                      className="form-control me-2"
+                      value={searchStagione.sezione}
+                      onChange={(e) =>
+                        setSearchStagione({
+                          ...searchStagione,
+                          sezione: e.target.value,
+                        })
+                      }
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="Cerca per anno..."
+                      className="form-control me-2"
+                      value={searchStagione.anno}
+                      onChange={(e) =>
+                        setSearchStagione({
+                          ...searchStagione,
+                          anno: e.target.value,
+                        })
+                      }
+                    />
+
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        setSearchStagione({
+                          titolo: "",
+                          sezione: "",
+                          anno: "",
+                        });
+                        fetchStagioni();
+                      }}
+                      className="ms-2"
+                    >
+                      ❌ Reset
+                    </Button>
+                  </div>
+
                   {!loading.stagioni && !error.stagioni && (
                     <Table striped bordered hover>
                       <thead>
@@ -569,7 +644,6 @@ const EditVideo = () => {
                           <tr key={stagione.id}>
                             <td>{stagione.id}</td>
 
-                            {/* 🔹 Titolo: diventa un form quando si edita */}
                             <td>
                               {editingStagioneId === stagione.id ? (
                                 <Form.Control
@@ -587,7 +661,6 @@ const EditVideo = () => {
                               )}
                             </td>
 
-                            {/* 🔹 Anno: diventa un form quando si edita */}
                             <td>
                               {editingStagioneId === stagione.id ? (
                                 <Form.Control
@@ -605,10 +678,8 @@ const EditVideo = () => {
                               )}
                             </td>
 
-                            {/* 🔹 Sezione: campo non modificabile */}
                             <td>{stagione.sezioneTitolo}</td>
 
-                            {/* 🔹 Immagine: pulsante Apri + Nuova immagine */}
                             <td>
                               <Button
                                 variant="link"
@@ -620,7 +691,6 @@ const EditVideo = () => {
                                 🔗 Apri
                               </Button>
 
-                              {/* Mostra il pulsante solo quando si sta modificando */}
                               {editingStagioneId === stagione.id && (
                                 <>
                                   <Button
@@ -653,7 +723,6 @@ const EditVideo = () => {
                               )}
                             </td>
 
-                            {/* 🔹 Opzioni: Edit → Salva */}
                             <td>
                               {editingStagioneId === stagione.id ? (
                                 <>
