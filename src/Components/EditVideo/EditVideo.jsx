@@ -27,6 +27,12 @@ const EditVideo = () => {
   const [showTagList, setShowTagList] = useState(false);
   const [editingId, setEditingId] = useState(null); // ID del video in modifica
   const [isLoading, setIsLoading] = useState(false); // Stato per gestire lo spinner di caricamento
+  const [editingStagioneId, setEditingStagioneId] = useState(null);
+  const [newImageFile, setNewImageFile] = useState(null);
+  const [editedStagione, setEditedStagione] = useState({
+    titolo: "",
+    anno: "",
+  });
 
   const [newVideoFile, setNewVideoFile] = useState(null); // File video nuovo
   const [editedVideo, setEditedVideo] = useState({
@@ -100,6 +106,15 @@ const EditVideo = () => {
     });
   };
 
+  const handleEditStagione = (stagione) => {
+    setEditingStagioneId(stagione.id);
+    setEditedStagione({
+      titolo: stagione.titolo,
+      anno: stagione.anno,
+    });
+    setNewImageFile(null);
+  };
+
   //---------------------FUNZIONI-------------------
 
   // Funzione per eliminare un elemento (Sezione, Stagione, Video)
@@ -125,6 +140,49 @@ const EditVideo = () => {
       }
     } catch (error) {
       alert(`❌ Error deleting ${type}: ` + error.message);
+    }
+  };
+  const handleSaveStagione = async (stagioneId) => {
+    try {
+      setIsLoading(true);
+      const formData = new FormData();
+
+      // Aggiungi solo i campi modificati per evitare di inviare dati vuoti
+      if (editedStagione.titolo) {
+        formData.append("titolo", editedStagione.titolo);
+      }
+      if (editedStagione.anno) {
+        formData.append("anno", editedStagione.anno);
+      }
+      if (newImageFile) {
+        formData.append("immagine", newImageFile);
+      }
+
+      const response = await fetch(
+        `http://localhost:3001/api/stagioni/${stagioneId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzk4MDM4ODQsImV4cCI6MTc0MDQwODY4NCwic3ViIjoiYWRtaW4ifQ.2ePglJcyk_oItqw1CeBlOVFM_rh-mmGEPIU2DYjKaR8BxXCgPkddoYoPh95bjTrBlw3n2VjgFrPyojEhM9kkvA`, // 🔹 Inserire il token corretto
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Errore durante l'aggiornamento della stagione");
+      }
+
+      alert("✅ Modifica effettuata con successo!");
+      fetchStagioni(); // 🔄 Ricarica la lista aggiornata
+
+      setEditingStagioneId(null);
+      setEditedStagione({ titolo: "", anno: "" });
+      setNewImageFile(null);
+    } catch (error) {
+      alert(`❌ Errore nel salvataggio: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -510,9 +568,47 @@ const EditVideo = () => {
                         {stagioni.map((stagione) => (
                           <tr key={stagione.id}>
                             <td>{stagione.id}</td>
-                            <td>{stagione.titolo}</td>
-                            <td>{stagione.anno}</td>
+
+                            {/* 🔹 Titolo: diventa un form quando si edita */}
+                            <td>
+                              {editingStagioneId === stagione.id ? (
+                                <Form.Control
+                                  type="text"
+                                  value={editedStagione.titolo}
+                                  onChange={(e) =>
+                                    setEditedStagione({
+                                      ...editedStagione,
+                                      titolo: e.target.value,
+                                    })
+                                  }
+                                />
+                              ) : (
+                                stagione.titolo
+                              )}
+                            </td>
+
+                            {/* 🔹 Anno: diventa un form quando si edita */}
+                            <td>
+                              {editingStagioneId === stagione.id ? (
+                                <Form.Control
+                                  type="text"
+                                  value={editedStagione.anno}
+                                  onChange={(e) =>
+                                    setEditedStagione({
+                                      ...editedStagione,
+                                      anno: e.target.value,
+                                    })
+                                  }
+                                />
+                              ) : (
+                                stagione.anno
+                              )}
+                            </td>
+
+                            {/* 🔹 Sezione: campo non modificabile */}
                             <td>{stagione.sezioneTitolo}</td>
+
+                            {/* 🔹 Immagine: pulsante Apri + Nuova immagine */}
                             <td>
                               <Button
                                 variant="link"
@@ -523,25 +619,90 @@ const EditVideo = () => {
                               >
                                 🔗 Apri
                               </Button>
+
+                              {/* Mostra il pulsante solo quando si sta modificando */}
+                              {editingStagioneId === stagione.id && (
+                                <>
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() =>
+                                      document
+                                        .getElementById(
+                                          `image-upload-${stagione.id}`
+                                        )
+                                        .click()
+                                    }
+                                  >
+                                    📸 Nuova Immagine
+                                  </Button>
+                                  <input
+                                    type="file"
+                                    id={`image-upload-${stagione.id}`}
+                                    style={{ display: "none" }}
+                                    onChange={(e) =>
+                                      setNewImageFile(e.target.files[0])
+                                    }
+                                  />
+                                  {newImageFile && (
+                                    <p className="mt-1 text-success">
+                                      {newImageFile.name}
+                                    </p>
+                                  )}
+                                </>
+                              )}
                             </td>
 
+                            {/* 🔹 Opzioni: Edit → Salva */}
                             <td>
-                              <Button variant="warning" size="sm" disabled>
-                                ✏️ Edit
-                              </Button>{" "}
-                              <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={() =>
-                                  handleDelete(
-                                    stagione.id,
-                                    "stagioni",
-                                    fetchStagioni
-                                  )
-                                }
-                              >
-                                🗑️ Delete
-                              </Button>
+                              {editingStagioneId === stagione.id ? (
+                                <>
+                                  {isLoading ? (
+                                    <Spinner
+                                      animation="border"
+                                      size="sm"
+                                      role="status"
+                                    >
+                                      <span className="visually-hidden">
+                                        Caricamento...
+                                      </span>
+                                    </Spinner>
+                                  ) : (
+                                    <Button
+                                      variant="success"
+                                      size="sm"
+                                      onClick={() =>
+                                        handleSaveStagione(stagione.id)
+                                      }
+                                    >
+                                      💾 Salva
+                                    </Button>
+                                  )}
+                                </>
+                              ) : (
+                                <>
+                                  <Button
+                                    variant="outline-warning"
+                                    size="sm"
+                                    onClick={() => handleEditStagione(stagione)}
+                                  >
+                                    ✏️ Edit
+                                  </Button>
+                                  <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleDelete(
+                                        stagione.id,
+                                        "stagioni",
+                                        fetchStagioni
+                                      )
+                                    }
+                                  >
+                                    🗑️ Delete
+                                  </Button>
+                                </>
+                              )}
                             </td>
                           </tr>
                         ))}
