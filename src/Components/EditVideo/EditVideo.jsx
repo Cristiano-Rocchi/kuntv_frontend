@@ -25,6 +25,13 @@ const EditVideo = () => {
   const [videos, setVideos] = useState([]);
   const [tagOptions, setTagOptions] = useState([]);
   const [showTagList, setShowTagList] = useState(false);
+  const [editingId, setEditingId] = useState(null); // ID del video in modifica
+
+  const [newVideoFile, setNewVideoFile] = useState(null); // File video nuovo
+  const [editedVideo, setEditedVideo] = useState({
+    titolo: "",
+    durata: "",
+  });
 
   const [loading, setLoading] = useState({
     sezioni: true,
@@ -82,6 +89,14 @@ const EditVideo = () => {
     if (valueA > valueB) return sortConfig.direction === "asc" ? 1 : -1;
     return 0;
   });
+
+  const handleEdit = (video) => {
+    setEditingId(video.id); // Attiviamo la modalità edit solo per questo video
+    setEditedVideo({
+      titolo: video.titolo,
+      durata: video.durata,
+    });
+  };
 
   //---------------------FUNZIONI-------------------
 
@@ -243,6 +258,47 @@ const EditVideo = () => {
       console.error("Errore nel caricamento dei tags:", error);
     }
   };
+
+  const handleSave = async (videoId) => {
+    try {
+      const formData = new FormData();
+      formData.append("titolo", editedVideo.titolo);
+      formData.append("durata", editedVideo.durata);
+
+      // Se l'utente ha caricato un nuovo file, lo aggiungiamo alla richiesta
+      if (newVideoFile) {
+        formData.append("file", newVideoFile);
+      }
+
+      const response = await fetch(
+        `http://localhost:3001/api/video/${videoId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzk4MDM4ODQsImV4cCI6MTc0MDQwODY4NCwic3ViIjoiYWRtaW4ifQ.2ePglJcyk_oItqw1CeBlOVFM_rh-mmGEPIU2DYjKaR8BxXCgPkddoYoPh95bjTrBlw3n2VjgFrPyojEhM9kkvA`,
+          },
+          body: formData, // Inviamo i dati aggiornati con il file (se presente)
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Errore durante il salvataggio");
+      }
+
+      alert("✅ Modifica effettuata con successo!");
+
+      // Ricarichiamo i dati per aggiornare la tabella
+      fetchVideos();
+
+      // Uscire dalla modalità edit
+      setEditingId(null);
+      setEditedVideo({ titolo: "", durata: "" });
+      setNewVideoFile(null);
+    } catch (error) {
+      alert(`❌ Errore nel salvataggio: ${error.message}`);
+    }
+  };
+
   return (
     <>
       <header className="d-flex justify-content-around mt-3">
@@ -575,8 +631,42 @@ const EditVideo = () => {
                         {sortedVideos.map((video) => (
                           <tr key={video.id}>
                             <td>{video.id}</td>
-                            <td>{video.titolo}</td>
-                            <td>{video.durata}</td>
+                            <td>
+                              {editingId === video.id ? (
+                                <Form.Control
+                                  type="text"
+                                  name="titolo"
+                                  value={editedVideo.titolo}
+                                  onChange={(e) =>
+                                    setEditedVideo({
+                                      ...editedVideo,
+                                      titolo: e.target.value,
+                                    })
+                                  }
+                                />
+                              ) : (
+                                video.titolo
+                              )}
+                            </td>
+
+                            <td>
+                              {editingId === video.id ? (
+                                <Form.Control
+                                  type="text"
+                                  name="durata"
+                                  value={editedVideo.durata}
+                                  onChange={(e) =>
+                                    setEditedVideo({
+                                      ...editedVideo,
+                                      durata: e.target.value,
+                                    })
+                                  }
+                                />
+                              ) : (
+                                video.durata
+                              )}
+                            </td>
+
                             <td>{video.stagioneTitolo || "N/A"}</td>
                             <td>{video.sezioneTitolo}</td>
                             <td>
@@ -585,15 +675,52 @@ const EditVideo = () => {
                                 .replace("https://", "")}
                             </td>
                             <td>
-                              <Button
-                                variant="link"
-                                size="sm"
-                                onClick={() =>
-                                  navigator.clipboard.writeText(video.fileLink)
-                                }
-                              >
-                                📋 Copia
-                              </Button>{" "}
+                              <td>
+                                {editingId === video.id ? (
+                                  <>
+                                    <Button
+                                      variant="secondary"
+                                      size="sm"
+                                      onClick={() =>
+                                        document
+                                          .getElementById(
+                                            `file-upload-${video.id}`
+                                          )
+                                          .click()
+                                      }
+                                    >
+                                      📂 Nuovo Video
+                                    </Button>
+                                    <input
+                                      type="file"
+                                      id={`file-upload-${video.id}`}
+                                      style={{ display: "none" }}
+                                      onChange={(e) =>
+                                        setNewVideoFile(e.target.files[0])
+                                      }
+                                    />
+                                    {newVideoFile && (
+                                      <p className="mt-1 text-success">
+                                        {newVideoFile.name}
+                                      </p>
+                                    )}
+                                  </>
+                                ) : (
+                                  <>
+                                    <Button
+                                      variant="link"
+                                      size="sm"
+                                      onClick={() =>
+                                        navigator.clipboard.writeText(
+                                          video.fileLink
+                                        )
+                                      }
+                                    >
+                                      📋 Copia
+                                    </Button>
+                                  </>
+                                )}
+                              </td>{" "}
                               <Button
                                 variant="link"
                                 size="sm"
@@ -608,22 +735,41 @@ const EditVideo = () => {
                               {new Date(video.dataCaricamento).toLocaleString()}
                             </td>
                             <td>
-                              <Button
-                                variant="outline-warning"
-                                size="sm"
-                                disabled
-                              >
-                                ✏️ Edit
-                              </Button>{" "}
-                              <Button
-                                variant="outline-danger"
-                                size="sm"
-                                onClick={() =>
-                                  handleDelete(video.id, "video", fetchVideos)
-                                }
-                              >
-                                🗑️ Delete
-                              </Button>
+                              {editingId === video.id ? (
+                                <>
+                                  <Button
+                                    variant="success"
+                                    size="sm"
+                                    onClick={() => handleSave(video.id)}
+                                  >
+                                    💾 Salva
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  <Button
+                                    variant="outline-warning"
+                                    size="sm"
+                                    onClick={() => handleEdit(video)}
+                                  >
+                                    ✏️ Edit
+                                  </Button>
+
+                                  <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={() =>
+                                      handleDelete(
+                                        video.id,
+                                        "video",
+                                        fetchVideos
+                                      )
+                                    }
+                                  >
+                                    🗑️ Delete
+                                  </Button>
+                                </>
+                              )}
                             </td>
                           </tr>
                         ))}
