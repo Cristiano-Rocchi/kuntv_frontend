@@ -26,6 +26,7 @@ const EditVideo = () => {
   const [tagOptions, setTagOptions] = useState([]);
   const [showTagList, setShowTagList] = useState(false);
   const [editingId, setEditingId] = useState(null); // ID del video in modifica
+  const [isLoading, setIsLoading] = useState(false); // Stato per gestire lo spinner di caricamento
 
   const [newVideoFile, setNewVideoFile] = useState(null); // File video nuovo
   const [editedVideo, setEditedVideo] = useState({
@@ -91,10 +92,11 @@ const EditVideo = () => {
   });
 
   const handleEdit = (video) => {
-    setEditingId(video.id); // Attiviamo la modalità edit solo per questo video
+    setEditingId(video.id);
     setEditedVideo({
       titolo: video.titolo,
       durata: video.durata,
+      stagioneId: video.stagioneId || video.stagione?.id || "",
     });
   };
 
@@ -261,11 +263,19 @@ const EditVideo = () => {
 
   const handleSave = async (videoId) => {
     try {
+      setIsLoading(true);
       const formData = new FormData();
-      formData.append("titolo", editedVideo.titolo);
-      formData.append("durata", editedVideo.durata);
 
-      // Se l'utente ha caricato un nuovo file, lo aggiungiamo alla richiesta
+      // Aggiungi solo i campi modificati per evitare di inviare valori vuoti
+      if (editedVideo.titolo) {
+        formData.append("titolo", editedVideo.titolo);
+      }
+      if (editedVideo.durata) {
+        formData.append("durata", editedVideo.durata);
+      }
+      if (editedVideo.stagioneId) {
+        formData.append("stagioneId", editedVideo.stagioneId);
+      }
       if (newVideoFile) {
         formData.append("file", newVideoFile);
       }
@@ -277,12 +287,13 @@ const EditVideo = () => {
           headers: {
             Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzk4MDM4ODQsImV4cCI6MTc0MDQwODY4NCwic3ViIjoiYWRtaW4ifQ.2ePglJcyk_oItqw1CeBlOVFM_rh-mmGEPIU2DYjKaR8BxXCgPkddoYoPh95bjTrBlw3n2VjgFrPyojEhM9kkvA`,
           },
-          body: formData, // Inviamo i dati aggiornati con il file (se presente)
+          body: formData, // Inviamo solo i dati aggiornati
         }
       );
 
       if (!response.ok) {
-        throw new Error("Errore durante il salvataggio");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Errore durante il salvataggio");
       }
 
       alert("✅ Modifica effettuata con successo!");
@@ -292,10 +303,12 @@ const EditVideo = () => {
 
       // Uscire dalla modalità edit
       setEditingId(null);
-      setEditedVideo({ titolo: "", durata: "" });
+      setEditedVideo({ titolo: "", durata: "", stagioneId: "" });
       setNewVideoFile(null);
     } catch (error) {
       alert(`❌ Errore nel salvataggio: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -651,30 +664,73 @@ const EditVideo = () => {
 
                             <td>
                               {editingId === video.id ? (
-                                <Form.Control
-                                  type="text"
-                                  name="durata"
-                                  value={editedVideo.durata}
-                                  onChange={(e) =>
-                                    setEditedVideo({
-                                      ...editedVideo,
-                                      durata: e.target.value,
-                                    })
-                                  }
-                                />
+                                <>
+                                  {console.log(
+                                    "Sezione del video:",
+                                    video.sezioneId
+                                  )}
+                                  {console.log(
+                                    "Stagioni disponibili:",
+                                    stagioni
+                                  )}
+
+                                  <Form.Control
+                                    type="text"
+                                    name="durata"
+                                    value={editedVideo.durata}
+                                    onChange={(e) =>
+                                      setEditedVideo({
+                                        ...editedVideo,
+                                        durata: e.target.value,
+                                      })
+                                    }
+                                  />
+                                </>
                               ) : (
                                 video.durata
                               )}
                             </td>
 
-                            <td>{video.stagioneTitolo || "N/A"}</td>
+                            <td>
+                              {editingId === video.id ? (
+                                <Form.Select
+                                  value={editedVideo.stagioneId}
+                                  onChange={(e) =>
+                                    setEditedVideo({
+                                      ...editedVideo,
+                                      stagioneId: e.target.value,
+                                    })
+                                  }
+                                >
+                                  <option value="">
+                                    {video.stagioneTitolo}
+                                  </option>
+                                  {stagioni
+                                    .filter(
+                                      (stagione) =>
+                                        stagione.sezioneId === video.sezioneId
+                                    )
+                                    .map((stagione) => (
+                                      <option
+                                        key={stagione.id}
+                                        value={stagione.id}
+                                      >
+                                        {stagione.titolo}
+                                      </option>
+                                    ))}
+                                </Form.Select>
+                              ) : (
+                                video.stagioneTitolo || "N/A"
+                              )}
+                            </td>
+
                             <td>{video.sezioneTitolo}</td>
                             <td>
                               {video.fileLink
                                 .split(".")[0]
                                 .replace("https://", "")}
                             </td>
-                            <td>
+                            <td className="d-flex">
                               <td>
                                 {editingId === video.id ? (
                                   <>
@@ -737,13 +793,25 @@ const EditVideo = () => {
                             <td>
                               {editingId === video.id ? (
                                 <>
-                                  <Button
-                                    variant="success"
-                                    size="sm"
-                                    onClick={() => handleSave(video.id)}
-                                  >
-                                    💾 Salva
-                                  </Button>
+                                  {isLoading ? (
+                                    <Spinner
+                                      animation="border"
+                                      size="sm"
+                                      role="status"
+                                    >
+                                      <span className="visually-hidden">
+                                        Caricamento...
+                                      </span>
+                                    </Spinner>
+                                  ) : (
+                                    <Button
+                                      variant="success"
+                                      size="sm"
+                                      onClick={() => handleSave(video.id)}
+                                    >
+                                      💾 Salva
+                                    </Button>
+                                  )}
                                 </>
                               ) : (
                                 <>
