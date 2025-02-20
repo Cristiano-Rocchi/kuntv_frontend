@@ -440,6 +440,7 @@ const EditVideo = () => {
                           <th>Titolo</th>
                           <th>Tag</th>
                           <th>Anno</th>
+                          <th>Immagine</th>
                           <th>Opzioni</th>
                         </tr>
                       </thead>
@@ -450,6 +451,18 @@ const EditVideo = () => {
                             <td>{sezione.titolo}</td>
                             <td>{sezione.tag.join(", ")}</td>
                             <td>{sezione.anno}</td>
+                            <td>
+                              <Button
+                                variant="link"
+                                size="sm"
+                                href={sezione.foto}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                🔗 Apri
+                              </Button>
+                            </td>
+
                             <td>
                               <Button variant="warning" size="sm" disabled>
                                 ✏️ Edit
@@ -489,6 +502,7 @@ const EditVideo = () => {
                           <th>Titolo</th>
                           <th>Anno</th>
                           <th>Sezione</th>
+                          <th>immagine</th>
                           <th>Opzioni</th>
                         </tr>
                       </thead>
@@ -499,6 +513,18 @@ const EditVideo = () => {
                             <td>{stagione.titolo}</td>
                             <td>{stagione.anno}</td>
                             <td>{stagione.sezioneTitolo}</td>
+                            <td>
+                              <Button
+                                variant="link"
+                                size="sm"
+                                href={stagione.immagineUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                🔗 Apri
+                              </Button>
+                            </td>
+
                             <td>
                               <Button variant="warning" size="sm" disabled>
                                 ✏️ Edit
