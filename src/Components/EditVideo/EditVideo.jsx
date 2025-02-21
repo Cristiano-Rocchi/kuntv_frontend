@@ -574,19 +574,6 @@ const EditVideo = () => {
                   <div className="d-flex mb-3">
                     <input
                       type="text"
-                      placeholder="Cerca per titolo..."
-                      className="form-control me-2"
-                      value={searchStagione.titolo}
-                      onChange={(e) =>
-                        setSearchStagione({
-                          ...searchStagione,
-                          titolo: e.target.value,
-                        })
-                      }
-                    />
-
-                    <input
-                      type="text"
                       placeholder="Cerca per sezione..."
                       className="form-control me-2"
                       value={searchStagione.sezione}
@@ -594,6 +581,18 @@ const EditVideo = () => {
                         setSearchStagione({
                           ...searchStagione,
                           sezione: e.target.value,
+                        })
+                      }
+                    />
+                    <input
+                      type="text"
+                      placeholder="Cerca per titolo..."
+                      className="form-control me-2"
+                      value={searchStagione.titolo}
+                      onChange={(e) =>
+                        setSearchStagione({
+                          ...searchStagione,
+                          titolo: e.target.value,
                         })
                       }
                     />
@@ -632,9 +631,10 @@ const EditVideo = () => {
                       <thead>
                         <tr>
                           <th>UUID</th>
+                          <th>Sezione</th>
                           <th>Titolo</th>
                           <th>Anno</th>
-                          <th>Sezione</th>
+
                           <th>immagine</th>
                           <th>Opzioni</th>
                         </tr>
@@ -643,6 +643,7 @@ const EditVideo = () => {
                         {stagioni.map((stagione) => (
                           <tr key={stagione.id}>
                             <td>{stagione.id}</td>
+                            <td>{stagione.sezioneTitolo}</td>
 
                             <td>
                               {editingStagioneId === stagione.id ? (
@@ -677,8 +678,6 @@ const EditVideo = () => {
                                 stagione.anno
                               )}
                             </td>
-
-                            <td>{stagione.sezioneTitolo}</td>
 
                             <td>
                               <Button
@@ -871,20 +870,21 @@ const EditVideo = () => {
                       <thead>
                         <tr>
                           <th>UUID</th>
-                          <th>Titolo</th>
-                          <th>Durata</th>
-                          <th
-                            onClick={() => requestSort("stagioneTitolo")}
-                            style={{ cursor: "pointer" }}
-                          >
-                            Stagione ⬍
-                          </th>
                           <th
                             onClick={() => requestSort("sezioneTitolo")}
                             style={{ cursor: "pointer" }}
                           >
                             Sezione ⬍
                           </th>
+                          <th
+                            onClick={() => requestSort("stagioneTitolo")}
+                            style={{ cursor: "pointer" }}
+                          >
+                            Stagione ⬍
+                          </th>
+                          <th>Titolo</th>
+                          <th>Durata</th>
+
                           <th>Bucket</th>
                           <th>Link</th>
                           <th
@@ -900,6 +900,39 @@ const EditVideo = () => {
                         {sortedVideos.map((video) => (
                           <tr key={video.id}>
                             <td>{video.id}</td>
+                            <td>{video.sezioneTitolo}</td>
+                            <td>
+                              {editingId === video.id ? (
+                                <Form.Select
+                                  value={editedVideo.stagioneId}
+                                  onChange={(e) =>
+                                    setEditedVideo({
+                                      ...editedVideo,
+                                      stagioneId: e.target.value,
+                                    })
+                                  }
+                                >
+                                  <option value="">
+                                    {video.stagioneTitolo}
+                                  </option>
+                                  {stagioni
+                                    .filter(
+                                      (stagione) =>
+                                        stagione.sezioneId === video.sezioneId
+                                    )
+                                    .map((stagione) => (
+                                      <option
+                                        key={stagione.id}
+                                        value={stagione.id}
+                                      >
+                                        {stagione.titolo}
+                                      </option>
+                                    ))}
+                                </Form.Select>
+                              ) : (
+                                video.stagioneTitolo || "N/A"
+                              )}
+                            </td>
                             <td>
                               {editingId === video.id ? (
                                 <Form.Control
@@ -947,40 +980,6 @@ const EditVideo = () => {
                               )}
                             </td>
 
-                            <td>
-                              {editingId === video.id ? (
-                                <Form.Select
-                                  value={editedVideo.stagioneId}
-                                  onChange={(e) =>
-                                    setEditedVideo({
-                                      ...editedVideo,
-                                      stagioneId: e.target.value,
-                                    })
-                                  }
-                                >
-                                  <option value="">
-                                    {video.stagioneTitolo}
-                                  </option>
-                                  {stagioni
-                                    .filter(
-                                      (stagione) =>
-                                        stagione.sezioneId === video.sezioneId
-                                    )
-                                    .map((stagione) => (
-                                      <option
-                                        key={stagione.id}
-                                        value={stagione.id}
-                                      >
-                                        {stagione.titolo}
-                                      </option>
-                                    ))}
-                                </Form.Select>
-                              ) : (
-                                video.stagioneTitolo || "N/A"
-                              )}
-                            </td>
-
-                            <td>{video.sezioneTitolo}</td>
                             <td>
                               {video.fileLink
                                 .split(".")[0]
