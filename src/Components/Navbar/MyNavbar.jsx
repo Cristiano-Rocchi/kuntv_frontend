@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./MyNavbar.scss";
 import { Container, Nav, Navbar } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 const MyNavbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -30,7 +31,9 @@ const MyNavbar = () => {
         <Container>
           <span></span>
           <Nav className="nav-elements">
-            <Nav.Link href="#">Home</Nav.Link>
+            <Nav.Link as={Link} to="/home">
+              Home
+            </Nav.Link>
             <Nav.Link href="#">Serie TV</Nav.Link>
             <Nav.Link href="#">Film</Nav.Link>
             <Nav.Link href="#">Radio</Nav.Link>
