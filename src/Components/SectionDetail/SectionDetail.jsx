@@ -12,6 +12,42 @@ const SectionDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stagioneSelezionata, setStagioneSelezionata] = useState(null);
+  const [videoStagione, setVideoStagione] = useState([]);
+  const [tuttiIVideo, setTuttiIVideo] = useState([]);
+
+  const handleSelezionaStagione = (idStagione) => {
+    // Filtra i video per la stagione selezionata
+    const videoFiltrati = tuttiIVideo.filter((video) => {
+      return video.stagioneId === idStagione;
+    });
+
+    setVideoStagione([...videoFiltrati]); // Forza un nuovo array per il re-render
+    setStagioneSelezionata(idStagione); // Assicura che la stagione sia aggiornata
+  };
+
+  useEffect(() => {
+    const fetchAllVideos = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/video", {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzk4MDM4ODQsImV4cCI6MTc0MDQwODY4NCwic3ViIjoiYWRtaW4ifQ.2ePglJcyk_oItqw1CeBlOVFM_rh-mmGEPIU2DYjKaR8BxXCgPkddoYoPh95bjTrBlw3n2VjgFrPyojEhM9kkvA`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("📌 Tutti i video ricevuti:", data);
+          setTuttiIVideo(data);
+        } else {
+          console.error("Errore nel recupero di tutti i video");
+        }
+      } catch (error) {
+        console.error("Errore nella richiesta API", error);
+      }
+    };
+
+    fetchAllVideos();
+  }, []);
 
   useEffect(() => {
     const fetchSezione = async () => {
@@ -82,7 +118,7 @@ const SectionDetail = () => {
               <div className="stagioni-sect-detail mt-5">
                 <h5>{sezione.titolo} Tutte Le Stagioni</h5>
                 <div className="d-flex">
-                  {sezione.stagioni.length > 5 ? (
+                  {sezione.stagioni.length > 6 ? (
                     <Swiper
                       slidesPerView={5}
                       spaceBetween={0}
@@ -108,12 +144,12 @@ const SectionDetail = () => {
                         {sezione.stagioni.map((stagione) => (
                           <div
                             key={stagione.id}
-                            onClick={() => setStagioneSelezionata(stagione.id)}
+                            onClick={() => handleSelezionaStagione(stagione.id)}
+                            style={{ cursor: "pointer" }}
                           >
                             <img
                               src={stagione.immagineUrl}
                               alt={stagione.titolo}
-                              style={{ cursor: "pointer" }} // Per indicare che è cliccabile
                             />
                             <p className="mt-1 text-center">
                               {stagione.titolo}
@@ -123,9 +159,19 @@ const SectionDetail = () => {
                       </div>
 
                       {/* Episodi visibili solo se è stata selezionata una stagione */}
-                      {stagioneSelezionata && (
-                        <div className=" mt-3">
-                          <button className="btn btn-primary"></button>
+                      {stagioneSelezionata && videoStagione.length > 0 && (
+                        <div className="episodi-container mt-3">
+                          <h5>Episodi disponibili:</h5>
+                          <div className="episodi-list">
+                            {videoStagione.map((video) => (
+                              <button
+                                key={video.id}
+                                className="btn btn-primary m-2"
+                              >
+                                {video.titolo}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
