@@ -7,6 +7,16 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 
 const SectionDetail = () => {
+  //-------------------FUNZIONI-------------------
+  const ordinaPerNumero = (array, key) => {
+    return [...array].sort((a, b) => {
+      const numeroA = parseInt(a[key].match(/\d+/)?.[0]) || 0;
+      const numeroB = parseInt(b[key].match(/\d+/)?.[0]) || 0;
+      return numeroA - numeroB;
+    });
+  };
+
+  // -------------------STATI-------------------
   const { nomeSezione } = useParams();
   const [sezione, setSezione] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -15,6 +25,7 @@ const SectionDetail = () => {
   const [videoStagione, setVideoStagione] = useState([]);
   const [tuttiIVideo, setTuttiIVideo] = useState([]);
 
+  // -------------------USE EFFECT-------------------
   const handleSelezionaStagione = (idStagione) => {
     console.log("Stagione selezionata:", idStagione);
     // Filtra i video per la stagione selezionata
@@ -79,6 +90,10 @@ const SectionDetail = () => {
   if (loading) return <p>Caricamento in corso...</p>;
   if (error) return <p>{error}</p>;
 
+  // -----VARIABILI PER IL SORT-----
+  const stagioniOrdinate = ordinaPerNumero(sezione.stagioni, "titolo");
+  const videoStagioneOrdinati = ordinaPerNumero(videoStagione, "titolo");
+
   return (
     <div className="body section-detail">
       <div className="header-sect-detail">
@@ -117,25 +132,22 @@ const SectionDetail = () => {
                 ))}
               </div>
               <div className="stagioni-sect-detail mt-5">
-                <h5>{sezione.titolo} Tutte Le Stagioni</h5>
+                <h5>
+                  {sezione.titolo} <span>Tutte Le Stagioni</span>
+                </h5>
                 <div className="d-flex">
-                  {sezione.stagioni.length > 6 ? (
+                  {stagioniOrdinate.length > 6 ? (
                     <Swiper
                       slidesPerView={5}
                       spaceBetween={0}
                       navigation={true}
-                      pagination={{ clickable: true }}
                       rewind={true}
-                      slideToClickedSlide={true}
                       modules={[Navigation]}
                     >
-                      {sezione.stagioni.map((stagione) => (
+                      {stagioniOrdinate.map((stagione) => (
                         <SwiperSlide
                           key={stagione.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSelezionaStagione(stagione.id);
-                          }}
+                          onClick={() => handleSelezionaStagione(stagione.id)}
                         >
                           <div
                             className="slide-card-sect-detail"
@@ -145,14 +157,16 @@ const SectionDetail = () => {
                               src={stagione.immagineUrl}
                               alt={stagione.titolo}
                             />
-                            <h3>{stagione.titolo}</h3>
+                            <p className="mt-1 text-center">
+                              {stagione.titolo}
+                            </p>
                           </div>
                         </SwiperSlide>
                       ))}
                     </Swiper>
                   ) : (
                     <div className="stagioni-statiche">
-                      {sezione.stagioni.map((stagione) => (
+                      {stagioniOrdinate.map((stagione) => (
                         <div
                           key={stagione.id}
                           onClick={() => handleSelezionaStagione(stagione.id)}
@@ -169,12 +183,22 @@ const SectionDetail = () => {
                   )}
                 </div>
 
-                {stagioneSelezionata && videoStagione.length > 0 && (
+                {stagioneSelezionata && videoStagioneOrdinati.length > 0 && (
                   <div className="episodi-container mt-3">
-                    <h5>Episodi disponibili:</h5>
+                    <h5>
+                      {
+                        sezione.stagioni.find(
+                          (s) => s.id === stagioneSelezionata
+                        ).titolo
+                      }
+                      <span className="">
+                        {" "}
+                        {videoStagioneOrdinati.length} Episodi
+                      </span>
+                    </h5>
                     <div className="episodi-list">
-                      {videoStagione.map((video) => (
-                        <button key={video.id} className="btn btn-primary m-2">
+                      {videoStagioneOrdinati.map((video) => (
+                        <button key={video.id} className="btn m-2">
                           {video.titolo}
                         </button>
                       ))}
