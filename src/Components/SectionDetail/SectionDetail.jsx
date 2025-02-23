@@ -4,6 +4,7 @@ import "./SectionDetail.scss";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { CalendarDays, ChevronRight, Home } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
 
 const SectionDetail = () => {
   const { nomeSezione } = useParams();
@@ -122,8 +123,11 @@ const SectionDetail = () => {
                     <Swiper
                       slidesPerView={5}
                       spaceBetween={0}
+                      navigation={true}
                       pagination={{ clickable: true }}
+                      rewind={true}
                       slideToClickedSlide={true}
+                      modules={[Navigation]}
                     >
                       {sezione.stagioni.map((stagione) => (
                         <SwiperSlide
