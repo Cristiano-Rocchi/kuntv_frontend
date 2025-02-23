@@ -67,10 +67,6 @@
 }
 
 //***card Stagioni***//
-.slide-card-sect-detail img {
-  width: 150px;
-  height: 250px;
-}
 
 .stagioni-statiche {
   display: flex;
@@ -78,6 +74,14 @@
   gap: 30px;
 }
 .stagioni-statiche img {
+  width: 180px;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 15px;
+  box-shadow: -6px 4px 21px 1px rgba(0, 0, 0, 0.61);
+}
+//***carosello***//
+.slide-card-sect-detail img {
   width: 180px;
   height: 250px;
   object-fit: cover;

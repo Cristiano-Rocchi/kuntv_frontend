@@ -4,7 +4,6 @@ import "./SectionDetail.scss";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { CalendarDays, ChevronRight, Home } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination } from "swiper/modules";
 
 const SectionDetail = () => {
   const { nomeSezione } = useParams();
@@ -16,13 +15,14 @@ const SectionDetail = () => {
   const [tuttiIVideo, setTuttiIVideo] = useState([]);
 
   const handleSelezionaStagione = (idStagione) => {
+    console.log("Stagione selezionata:", idStagione);
     // Filtra i video per la stagione selezionata
     const videoFiltrati = tuttiIVideo.filter((video) => {
       return video.stagioneId === idStagione;
     });
 
-    setVideoStagione([...videoFiltrati]); // Forza un nuovo array per il re-render
-    setStagioneSelezionata(idStagione); // Assicura che la stagione sia aggiornata
+    setVideoStagione([...videoFiltrati]);
+    setStagioneSelezionata(idStagione);
   };
 
   useEffect(() => {
@@ -123,12 +123,20 @@ const SectionDetail = () => {
                       slidesPerView={5}
                       spaceBetween={0}
                       pagination={{ clickable: true }}
-                      modules={[Pagination]}
-                      className="mySwiper"
+                      slideToClickedSlide={true}
                     >
                       {sezione.stagioni.map((stagione) => (
-                        <SwiperSlide key={stagione.id}>
-                          <div className="slide-card-sect-detail">
+                        <SwiperSlide
+                          key={stagione.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelezionaStagione(stagione.id);
+                          }}
+                        >
+                          <div
+                            className="slide-card-sect-detail"
+                            style={{ cursor: "pointer" }}
+                          >
                             <img
                               src={stagione.immagineUrl}
                               alt={stagione.titolo}
@@ -139,44 +147,36 @@ const SectionDetail = () => {
                       ))}
                     </Swiper>
                   ) : (
-                    <div>
-                      <div className="stagioni-statiche">
-                        {sezione.stagioni.map((stagione) => (
-                          <div
-                            key={stagione.id}
-                            onClick={() => handleSelezionaStagione(stagione.id)}
-                            style={{ cursor: "pointer" }}
-                          >
-                            <img
-                              src={stagione.immagineUrl}
-                              alt={stagione.titolo}
-                            />
-                            <p className="mt-1 text-center">
-                              {stagione.titolo}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Episodi visibili solo se è stata selezionata una stagione */}
-                      {stagioneSelezionata && videoStagione.length > 0 && (
-                        <div className="episodi-container mt-3">
-                          <h5>Episodi disponibili:</h5>
-                          <div className="episodi-list">
-                            {videoStagione.map((video) => (
-                              <button
-                                key={video.id}
-                                className="btn btn-primary m-2"
-                              >
-                                {video.titolo}
-                              </button>
-                            ))}
-                          </div>
+                    <div className="stagioni-statiche">
+                      {sezione.stagioni.map((stagione) => (
+                        <div
+                          key={stagione.id}
+                          onClick={() => handleSelezionaStagione(stagione.id)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <img
+                            src={stagione.immagineUrl}
+                            alt={stagione.titolo}
+                          />
+                          <p className="mt-1 text-center">{stagione.titolo}</p>
                         </div>
-                      )}
+                      ))}
                     </div>
                   )}
                 </div>
+
+                {stagioneSelezionata && videoStagione.length > 0 && (
+                  <div className="episodi-container mt-3">
+                    <h5>Episodi disponibili:</h5>
+                    <div className="episodi-list">
+                      {videoStagione.map((video) => (
+                        <button key={video.id} className="btn btn-primary m-2">
+                          {video.titolo}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </Col>
