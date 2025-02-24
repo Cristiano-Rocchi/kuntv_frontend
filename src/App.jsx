@@ -7,6 +7,7 @@ import TvSeries from "./Components/TvSeries/TvSeries";
 import Admin from "./Components/Admin/Admin";
 import EditVideo from "./Components/EditVideo/EditVideo";
 import SectionDetail from "./Components/SectionDetail/SectionDetail";
+import VideoPlayer from "./Components/Player/VideoPlayer";
 
 const App = () => {
   const location = useLocation();
@@ -25,6 +26,7 @@ const App = () => {
         <Route path="/tvseries" element={<TvSeries />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/editvideo" element={<EditVideo />} />
+        <Route path="/video/:id" element={<VideoPlayer />} />
       </Routes>
     </>
   );

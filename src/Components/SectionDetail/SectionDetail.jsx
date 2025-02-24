@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import "./SectionDetail.scss";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { CalendarDays, ChevronRight, Home } from "lucide-react";
@@ -21,6 +21,7 @@ const SectionDetail = () => {
   const [sezione, setSezione] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
   const [stagioneSelezionata, setStagioneSelezionata] = useState(null);
   const [videoStagione, setVideoStagione] = useState([]);
   const [tuttiIVideo, setTuttiIVideo] = useState([]);
@@ -201,7 +202,7 @@ const SectionDetail = () => {
                         <button
                           key={video.id}
                           className="btn m-2"
-                          onClick={() => window.open(video.fileLink, "_blank")}
+                          onClick={() => navigate(`/video/${video.id}`)}
                         >
                           {video.titolo}
                         </button>
