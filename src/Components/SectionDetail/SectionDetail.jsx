@@ -136,7 +136,7 @@ const SectionDetail = () => {
                   {sezione.titolo} <span>Tutte Le Stagioni</span>
                 </h5>
                 <div className="d-flex">
-                  {stagioniOrdinate.length > 6 ? (
+                  {stagioniOrdinate.length > 5 ? (
                     <Swiper
                       slidesPerView={5}
                       spaceBetween={0}
@@ -198,7 +198,11 @@ const SectionDetail = () => {
                     </h5>
                     <div className="episodi-list">
                       {videoStagioneOrdinati.map((video) => (
-                        <button key={video.id} className="btn m-2">
+                        <button
+                          key={video.id}
+                          className="btn m-2"
+                          onClick={() => window.open(video.fileLink, "_blank")}
+                        >
                           {video.titolo}
                         </button>
                       ))}
