@@ -1,4 +1,31 @@
+@import "../../App.scss";
 .vjs-control-bar {
   background: rgba(0, 0, 0, 0.7) !important;
   border-radius: 5px !important;
+  color: $primary !important;
+}
+
+.video-js {
+  height: 100vh !important;
+}
+
+.video-player {
+  background: rgb(0, 0, 0);
+  background: linear-gradient(
+    176deg,
+    rgba(0, 0, 0, 1) 26%,
+    rgba(62, 51, 15, 1) 99%
+  );
+
+  .vjs-mute-control,
+  .vjs-play-control,
+  .vjs-fullscreen-control {
+    font-size: 1.3em;
+
+    bottom: 3px;
+    right: 6px;
+  }
+  .vjs-remaining-time-display {
+    font-size: 1.3em;
+  }
 }

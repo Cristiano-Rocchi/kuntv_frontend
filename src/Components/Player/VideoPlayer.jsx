@@ -1,7 +1,8 @@
 import "./VideoPlayer.scss";
+import "../../App.scss";
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container } from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
 import "videojs-playlist";
@@ -51,7 +52,7 @@ const VideoPlayer = () => {
 
       const player = videojs(videoElement, {
         controls: true,
-        autoplay: true,
+        autoplay: false,
         preload: "auto",
         fluid: true,
       });
@@ -74,12 +75,12 @@ const VideoPlayer = () => {
 
       const prevButton = videojs.dom.createEl("button", {
         className: "vjs-control vjs-button",
-        innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`,
+        innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgb(212, 175, 55)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`,
       });
 
       const nextButton = videojs.dom.createEl("button", {
         className: "vjs-control vjs-button",
-        innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`,
+        innerHTML: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgb(212, 175, 55)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`,
       });
 
       prevButton.onclick = () => {
@@ -110,10 +111,21 @@ const VideoPlayer = () => {
   }, [id, tuttiIVideo, navigate]);
 
   return (
-    <Container className="text-center mt-4">
-      <div ref={videoContainerRef}></div>
-      <div className="ciao">ciao</div>
-    </Container>
+    <div className="video-player">
+      {" "}
+      <Container className="text-center mt-4">
+        <Row>
+          <Col xs={12} md={11}>
+            <div ref={videoContainerRef} className="video-container"></div>
+          </Col>
+          <Col xs={12} md={1}>
+            <h1>ciao</h1>
+            <h2>ciao</h2>
+            <h3>ciao</h3>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   );
 };
 
