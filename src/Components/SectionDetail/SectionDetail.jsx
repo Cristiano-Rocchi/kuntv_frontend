@@ -43,7 +43,7 @@ const SectionDetail = () => {
       try {
         const response = await fetch("http://localhost:3001/api/video", {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzk4MDM4ODQsImV4cCI6MTc0MDQwODY4NCwic3ViIjoiYWRtaW4ifQ.2ePglJcyk_oItqw1CeBlOVFM_rh-mmGEPIU2DYjKaR8BxXCgPkddoYoPh95bjTrBlw3n2VjgFrPyojEhM9kkvA`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
           },
         });
 
@@ -69,7 +69,7 @@ const SectionDetail = () => {
           `http://localhost:3001/api/sezioni/titolo/${nomeSezione}`,
           {
             headers: {
-              Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Mzk4MDM4ODQsImV4cCI6MTc0MDQwODY4NCwic3ViIjoiYWRtaW4ifQ.2ePglJcyk_oItqw1CeBlOVFM_rh-mmGEPIU2DYjKaR8BxXCgPkddoYoPh95bjTrBlw3n2VjgFrPyojEhM9kkvA`,
+              Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
             },
           }
         );
