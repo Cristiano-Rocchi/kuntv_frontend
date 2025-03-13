@@ -250,7 +250,7 @@ const Admin = () => {
         formData,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`,
             "Content-Type": "multipart/form-data",
           },
           onUploadProgress: (progressEvent) => {
@@ -338,7 +338,7 @@ const Admin = () => {
         formData,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`,
             "Content-Type": "multipart/form-data",
           },
           onUploadProgress: (progressEvent) => {
@@ -411,7 +411,7 @@ const Admin = () => {
         formData,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`,
             "Content-Type": "multipart/form-data",
           },
           onUploadProgress: (progressEvent) => {
@@ -520,7 +520,7 @@ const Admin = () => {
         formData,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`,
             "Content-Type": "multipart/form-data",
           },
           onUploadProgress: (progressEvent) => {
@@ -577,7 +577,7 @@ const Admin = () => {
       try {
         const response = await fetch("http://localhost:3001/api/sezioni", {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`,
           },
         });
         if (response.ok) {
@@ -605,7 +605,7 @@ const Admin = () => {
         `http://localhost:3001/api/stagioni/sezione/${sezioneId}`,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`,
           },
         }
       );
@@ -630,7 +630,7 @@ const Admin = () => {
       try {
         const response = await fetch("http://localhost:3001/api/sezioni/tags", {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`,
           },
         });
 

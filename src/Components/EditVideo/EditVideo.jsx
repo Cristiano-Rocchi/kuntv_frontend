@@ -134,7 +134,7 @@ const EditVideo = () => {
       const response = await fetch(`http://localhost:3001/api/${type}/${id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`,
         },
       });
 
@@ -169,7 +169,7 @@ const EditVideo = () => {
         {
           method: "PUT",
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`, // 🔹 Inserire il token corretto
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`, // 🔹 Inserire il token corretto
           },
           body: formData,
         }
@@ -248,7 +248,7 @@ const EditVideo = () => {
         `http://localhost:3001/api/sezioni?${queryParams.toString()}`,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`,
           },
         }
       );
@@ -279,7 +279,7 @@ const EditVideo = () => {
 
       const response = await fetch(url, {
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`,
         },
       });
 
@@ -306,7 +306,7 @@ const EditVideo = () => {
         `http://localhost:3001/api/video?${queryParams.toString()}`,
         {
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`,
           },
         }
       );
@@ -326,7 +326,7 @@ const EditVideo = () => {
     try {
       const response = await fetch("http://localhost:3001/api/sezioni/tags", {
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
+          Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`,
         },
       });
       if (!response.ok) throw new Error("Errore nel recupero dei tags");
@@ -362,7 +362,7 @@ const EditVideo = () => {
         {
           method: "PUT",
           headers: {
-            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDA0MDkyMDAsImV4cCI6MTc0MTAxNDAwMCwic3ViIjoiYWRtaW4ifQ.h3JHNYoC5cOEWM6WVxM9rY03sw9cRiG91gyI-VVkghO6fJOOcVkUtNgKbkKtkr_b0dl9Qzjq6vIDdhBFmEp4nw`,
+            Authorization: `Bearer eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDE4NTg3MjcsImV4cCI6MTc0MjQ2MzUyNywic3ViIjoiYWRtaW4ifQ.CxAADsXceuB8wEXdcqu4RKiMNeNkCeG8Z3SxEPeSirUYwqtR_hb2bhAlEKx67EHIa4UL2SDEV1pbNkuTkQviMA`,
           },
           body: formData, // Inviamo solo i dati aggiornati
         }
